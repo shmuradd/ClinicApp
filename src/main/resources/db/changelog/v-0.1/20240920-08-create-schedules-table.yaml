@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 08
+      author: qedirbabayev
+      changes:
+        - createTable:
+            tableName: schedules
+            columns:
+              - column:
+                  name: schedule_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                 name: doctor_id
+                 type: INT
+                 constraints:
+                   nullable: false
+              - column:
+                 name: clinic_id
+                 type: INT
+                 constraints:
+                   nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: schedules
+            baseColumnNames: doctor_id
+            constraintName: fk_schedule_doctor
+            referencedTableName: doctors
+            referencedColumnNames: doctor_id
+
+        - addForeignKeyConstraint:
+            baseTableName: schedules
+            baseColumnNames: clinic_id
+            constraintName: fk_schedule_clinic
+            referencedTableName: clinics
+            referencedColumnNames: clinic_id
