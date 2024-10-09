@@ -36,6 +36,9 @@ public class DoctorServiceImpl implements DoctorService {
 @Override
 @Transactional
 public List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto) {
+
+    double radiusInKm = 10.0;  // 10 km radius
+
     if (requestDoctorDto == null) {
         throw new IllegalArgumentException("Request data cannot be null");
     }
@@ -56,7 +59,7 @@ public List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoc
         return Collections.emptyList();
     }
 
-    return locationOperation.doctorSearchForLocationSpec(responseDoctorDtoList, requestDoctorDto);
+    return locationOperation.doctorSearchForLocationSpecWithinRadius(responseDoctorDtoList, requestDoctorDto, radiusInKm);
 }
 
 
