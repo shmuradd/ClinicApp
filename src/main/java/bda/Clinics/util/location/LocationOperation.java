@@ -8,13 +8,13 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -25,6 +25,8 @@ public class LocationOperation {
     private final CoordinatesResponse coordinatesResponse;
     private final LocationRequest locationRequest;
 
+    private static final String GEOCODING_API_URL = "https://maps.googleapis.com/maps/api/geocode/json";
+    private static final String API_KEY = "AIzaSyCt-YiA9TJ2hNVuVWbytkAcbqEMga-nGLs"; // Add your Google API key here
 
     public LocationOperation(CoordinatesResponse coordinatesResponse, LocationRequest locationRequest) {
         this.coordinatesResponse = coordinatesResponse;
@@ -40,15 +42,20 @@ public class LocationOperation {
 
         try {
             GeocodingResult[] results = GeocodingApi.geocode(geoApiContext, location).await();
+            log.info("Geocoding API returned {} results for location {}", results.length, location);
+
             if (results.length > 0) {
+                log.info("Coordinates found: Lat: {}, Lng: {}", results[0].geometry.location.lat, results[0].geometry.location.lng);
                 coordinatesResponse.setLatitude(results[0].geometry.location.lat);
                 coordinatesResponse.setLongitude(results[0].geometry.location.lng);
                 coordinatesResponse.setAddress(results[0].formattedAddress);
             } else {
+                log.warn("No results found for location: {}", location);
                 coordinatesResponse.setError("No results found for this location.");
             }
         } catch (Exception e) {
             coordinatesResponse.setError("Error retrieving location: " + e.getMessage());
+            log.error("Error during geocoding for location {}: {}", location, e.getMessage());
         }
 
         return coordinatesResponse;
@@ -102,23 +109,35 @@ public class LocationOperation {
         return distance;
     }
 
-    public UserLocation getUserLocation(String requestLocation) {
-        UserLocation userLocation = new UserLocation();
-        locationRequest.setLocation(requestLocation);
-        CoordinatesResponse coordinates = getCoordinates(locationRequest);
+    public UserLocation getUserLocation(String location) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = GEOCODING_API_URL + "?address=" + location + "&key=" + API_KEY;
 
-        double userLat = coordinates != null ? coordinates.getLatitude() : 0;
-        double userLon = coordinates != null ? coordinates.getLongitude() : 0;
+        // Make an HTTP request to the geocoding API
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
+        if (response.getStatusCode().is2xxSuccessful()) {
+            // Parse the response JSON
+            JSONObject jsonResponse = new JSONObject(response.getBody());
+            if (!jsonResponse.getJSONArray("results").isEmpty()) {
+                JSONObject locationData = jsonResponse.getJSONArray("results")
+                        .getJSONObject(0)
+                        .getJSONObject("geometry")
+                        .getJSONObject("location");
 
-        if (coordinates == null || (userLat == 0 && userLon == 0)) {
-            log.warn("Using default coordinates for Baku.");
-            userLat = 40.40982397041654;
-            userLon = 49.87154756154538;
+                // Extract latitude and longitude
+                double lat = locationData.getDouble("lat");
+                double lon = locationData.getDouble("lng");
+
+                // Create and return UserLocation object
+                UserLocation userLocation = new UserLocation();
+                userLocation.setUserLat(lat);
+                userLocation.setUserLon(lon);
+                return userLocation;
+            }
         }
-        userLocation.setUserLat(userLat);
-        userLocation.setUserLon(userLon);
-        return userLocation;
+        // Return null or throw an exception if geocoding fails
+        throw new RuntimeException("Failed to convert location to coordinates.");
     }
 
     public void calculateUserLocationToClinicLocation(RequestClinicDto requestClinicDto, UserLocation userLocation) {
@@ -136,18 +155,47 @@ public class LocationOperation {
         }
     }
 
-    public List<ResponseDoctorDto> doctorSearchForLocationSpec(List<ResponseDoctorDto> doctorDtoList, RequestDoctorDto requestDoctorDto) {
-        doctorDtoList.stream().map(doctorDto -> {
-            Set<RequestClinicDto> doctorDtoClinics = doctorDto.getClinics();
-            UserLocation userLocation = getUserLocation(requestDoctorDto.getLocation());
-            for (RequestClinicDto requestClinicDto : doctorDtoClinics) {
-                calculateUserLocationToClinicLocation(requestClinicDto, userLocation);
-            }
-            List<RequestClinicDto> clinics = new ArrayList<>(doctorDtoClinics);
-            clinics.sort(Comparator.comparingDouble(RequestClinicDto::getDistance));
-            doctorDto.setClinics(doctorDtoClinics);
-            return doctorDto;
-        }).collect(Collectors.toList());
-        return doctorDtoList;
+    public List<ResponseDoctorDto> doctorSearchForLocationSpecWithinRadius(List<ResponseDoctorDto> doctorDtoList, RequestDoctorDto requestDoctorDto, double radiusInKm) {
+        // Geocode the user's location to get their latitude and longitude
+        UserLocation userLocation = getUserLocation(requestDoctorDto.getLocation());
+
+        // Filter and sort clinics by distance within the specified radius (e.g., 10 km)
+        return doctorDtoList.stream()
+                .map(doctorDto -> {
+                    Set<RequestClinicDto> doctorClinics = doctorDto.getClinics();
+
+                    // Calculate the distance between user's location and each clinic
+                    List<RequestClinicDto> clinicsWithinRadius = doctorClinics.stream()
+                            .map(clinic -> {
+                                String googleMapsLink = clinic.getLocation(); // Assuming clinic location is stored as Google Maps link
+                                String[] clinicCoordinates = extractCoordinatesFromGoogleMapsLink(googleMapsLink);
+
+                                if (clinicCoordinates != null && clinicCoordinates.length == 2) {
+                                    try {
+                                        double clinicLat = Double.parseDouble(clinicCoordinates[0]);
+                                        double clinicLon = Double.parseDouble(clinicCoordinates[1]);
+                                        double distance = calculateDistance(userLocation.getUserLat(), userLocation.getUserLon(), clinicLat, clinicLon);
+                                        clinic.setDistance(distance); // Set distance to clinic for future use
+                                        log.info("Clinic {}: Distance from user: {}", clinic.getClinicName(), clinic.getDistance());
+                                    } catch (NumberFormatException e) {
+                                        log.error("Error parsing clinic coordinates for clinic: {}", clinic.getCity(), e);
+                                    }
+                                }
+                                return clinic;
+                            })
+                            // Filter clinics within the given radius
+                            .filter(clinic -> clinic.getDistance() <= radiusInKm)
+                            // Sort the clinics by distance (from nearest to farthest)
+                            .sorted(Comparator.comparingDouble(RequestClinicDto::getDistance))
+                            .collect(Collectors.toList());
+
+                    // Update the clinics in the doctor object with those that are within the radius and sorted by distance
+                    doctorDto.setClinics(new HashSet<>(clinicsWithinRadius)); // Ensure clinics are ordered properly here
+
+                    return doctorDto;
+                })
+                // Only return doctors with clinics within the radius
+                .filter(doctorDto -> !doctorDto.getClinics().isEmpty())
+                .collect(Collectors.toList());
     }
 }

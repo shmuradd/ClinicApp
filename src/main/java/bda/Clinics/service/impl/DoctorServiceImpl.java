@@ -33,31 +33,28 @@ public class DoctorServiceImpl implements DoctorService {
         this.modelMapper = modelMapper;
         this.locationOperation = locationOperation;
     }
-@Override
-@Transactional
-public List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto) {
-    if (requestDoctorDto == null) {
-        throw new IllegalArgumentException("Request data cannot be null");
+    @Override
+    @Transactional
+    public List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto) {
+        double radiusInKm = 10.0;  // 10 km radius
+
+        List<ResponseDoctorDto> doctorDtoList = doctorRepository.findAll(Specification
+                        .allOf(DoctorSpecification.hasFullName(requestDoctorDto.getFullName()))
+                        .or(DoctorSpecification.hasSpeciality(requestDoctorDto.getSpeciality()))
+                        .or(DoctorSpecification.hasClinic(requestDoctorDto.getClinicName())))
+                .stream()
+                .map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class))
+                .collect(Collectors.toList());
+
+        if (!doctorDtoList.isEmpty()) {
+            // Filter doctors by location and distance within 10 km
+            return locationOperation.doctorSearchForLocationSpecWithinRadius(doctorDtoList, requestDoctorDto, radiusInKm);
+        } else {
+            List<Doctor> doctors = doctorRepository.findAll();
+            List<ResponseDoctorDto> map = doctors.stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
+            return locationOperation.doctorSearchForLocationSpecWithinRadius(map, requestDoctorDto, radiusInKm);
+        }
     }
-
-    Specification<Doctor> spec = Specification
-            .where(DoctorSpecification.hasFullName(requestDoctorDto.getFullName()))
-            .and(DoctorSpecification.hasSpeciality(requestDoctorDto.getSpeciality()))
-            .and(DoctorSpecification.hasClinic(requestDoctorDto.getClinicName()));
-//            .and(DoctorSpecification.hasMoreThanXReviews(requestDoctorDto.getReviewCount()))
-//            .and(DoctorSpecification.hasMoreThanXRating(requestDoctorDto.getRatingCount()));
-
-    List<ResponseDoctorDto> responseDoctorDtoList = doctorRepository.findAll(spec)
-            .stream()
-            .map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class))
-            .collect(Collectors.toList());
-
-    if (responseDoctorDtoList.isEmpty()) {
-        return Collections.emptyList();
-    }
-
-    return locationOperation.doctorSearchForLocationSpec(responseDoctorDtoList, requestDoctorDto);
-}
 
 
     @Override
