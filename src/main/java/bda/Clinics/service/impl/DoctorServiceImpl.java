@@ -38,6 +38,11 @@ public class DoctorServiceImpl implements DoctorService {
     public List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto) {
         double radiusInKm = 10.0;  // 10 km radius
 
+        // Check if location is empty and set default Baku coordinates
+        if (requestDoctorDto.getLocation() == null || requestDoctorDto.getLocation().isEmpty()) {
+            requestDoctorDto.setLocation("Baku, Azerbaijan");
+        }
+
         List<ResponseDoctorDto> doctorDtoList = doctorRepository.findAll(Specification
                         .allOf(DoctorSpecification.hasFullName(requestDoctorDto.getFullName()))
                         .or(DoctorSpecification.hasSpeciality(requestDoctorDto.getSpeciality()))
@@ -55,6 +60,7 @@ public class DoctorServiceImpl implements DoctorService {
             return locationOperation.doctorSearchForLocationSpecWithinRadius(map, requestDoctorDto, radiusInKm);
         }
     }
+
 
 
     @Override

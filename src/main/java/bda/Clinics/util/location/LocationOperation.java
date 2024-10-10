@@ -110,14 +110,20 @@ public class LocationOperation {
     }
 
     public UserLocation getUserLocation(String location) {
+        if (location == null || location.isEmpty()) {
+            // Return default Baku coordinates
+            UserLocation bakuLocation = new UserLocation();
+            bakuLocation.setUserLat(40.4093); // Baku Latitude
+            bakuLocation.setUserLon(49.8671); // Baku Longitude
+            return bakuLocation;
+        }
+
+        // Existing code for geocoding other locations
         RestTemplate restTemplate = new RestTemplate();
         String url = GEOCODING_API_URL + "?address=" + location + "&key=" + API_KEY;
-
-        // Make an HTTP request to the geocoding API
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            // Parse the response JSON
             JSONObject jsonResponse = new JSONObject(response.getBody());
             if (!jsonResponse.getJSONArray("results").isEmpty()) {
                 JSONObject locationData = jsonResponse.getJSONArray("results")
@@ -125,20 +131,18 @@ public class LocationOperation {
                         .getJSONObject("geometry")
                         .getJSONObject("location");
 
-                // Extract latitude and longitude
                 double lat = locationData.getDouble("lat");
                 double lon = locationData.getDouble("lng");
 
-                // Create and return UserLocation object
                 UserLocation userLocation = new UserLocation();
                 userLocation.setUserLat(lat);
                 userLocation.setUserLon(lon);
                 return userLocation;
             }
         }
-        // Return null or throw an exception if geocoding fails
         throw new RuntimeException("Failed to convert location to coordinates.");
     }
+
 
     public void calculateUserLocationToClinicLocation(RequestClinicDto requestClinicDto, UserLocation userLocation) {
         String googleMapsLink = requestClinicDto.getLocation();
