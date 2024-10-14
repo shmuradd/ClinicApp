@@ -5,8 +5,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require
-    username:  ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: doadmin
+    password: AVNS_ouQvQEXjqECLLIypm8Y
     hikari:
       maximum-pool-size: 10
 

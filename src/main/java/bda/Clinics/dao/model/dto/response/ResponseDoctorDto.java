@@ -21,4 +21,5 @@ public class ResponseDoctorDto {
     String serviceDescription;
     Set<RequestClinicDto> clinics;
     Set<ResponseReviewDto> reviews;
+    String photoUrl;
 }
