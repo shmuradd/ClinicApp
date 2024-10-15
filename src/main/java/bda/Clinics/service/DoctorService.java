@@ -9,5 +9,5 @@ public interface DoctorService {
     List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto);
 
     List<ResponseDoctorDto> findAll();
-
+    public ResponseDoctorDto getDoctorById(Long doctorId);
 }
