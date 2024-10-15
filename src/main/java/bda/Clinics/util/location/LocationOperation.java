@@ -40,6 +40,12 @@ public class LocationOperation {
     public CoordinatesResponse getCoordinates(LocationRequest request) {
         String location = request.getLocation();
 
+
+        if (location == null || location.isEmpty()) {
+            log.warn("Location is null or empty. Skipping geocoding.");
+            coordinatesResponse.setError("Location cannot be null or empty.");
+            return coordinatesResponse;
+        }
         try {
             GeocodingResult[] results = GeocodingApi.geocode(geoApiContext, location).await();
             log.info("Geocoding API returned {} results for location {}", results.length, location);
