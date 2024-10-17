@@ -83,6 +83,14 @@ public class LocationOperation {
     }
 
     public UserLocation getUserLocation(String location) {
+
+        if (location == null || location.isEmpty()) {
+            // Return default Baku coordinates
+            UserLocation bakuLocation = new UserLocation();
+            bakuLocation.setUserLat(40.4093); // Baku Latitude
+            bakuLocation.setUserLon(49.8671); // Baku Longitude
+            return bakuLocation;
+        }
         RestTemplate restTemplate = new RestTemplate();
         String url = GEOCODING_API_URL + "?address=" + location + "&key=" + API_KEY;
         log.info("Sending request to Geocoding API: {}", url);

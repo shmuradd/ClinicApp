@@ -18,7 +18,7 @@ import java.util.Set;
 public class Clinic {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     Long clinicId;
 
     String clinicName;

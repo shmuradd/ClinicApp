@@ -1,8 +1,11 @@
 package bda.Clinics.dao.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
@@ -18,16 +21,12 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long reviewId;
-
+    String fullName;
     int rating;
-    String comments;
-
-    @Temporal(TemporalType.TIMESTAMP)
+    String comment;
+    Boolean conditionAgreed;
+    @CreationTimestamp
     Date reviewDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", nullable = false)
-    Patient patient;
 
 
 }

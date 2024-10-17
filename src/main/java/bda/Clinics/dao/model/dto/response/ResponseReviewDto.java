@@ -13,6 +13,7 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResponseReviewDto {
     int rating;
-    String comments;
+    String comment;
     Date reviewDate;
+    String fullName;
 }

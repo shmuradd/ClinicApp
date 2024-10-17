@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -16,10 +17,13 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString
+
+@NamedEntityGraph(name = "doctor.clinics",
+        attributeNodes = @NamedAttributeNode("clinics") )
 public class Doctor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     Long doctorId;
     String fullName;
     String speciality;
@@ -36,14 +40,14 @@ public class Doctor {
             name = "doctor_clinic",
             joinColumns = @JoinColumn(name = "doctor_id"),
             inverseJoinColumns = @JoinColumn(name = "clinic_id"))
-    Set<Clinic> clinics;
+    Set<Clinic> clinics=new HashSet<>();
 
 
-    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "doctor_id", referencedColumnName = "doctorId")
-    Set<Review> reviews;
+    Set<Review> reviews=new HashSet<>();
 
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    Set<Schedule> schedules;
+    Set<Schedule> schedules=new HashSet<>();
 }

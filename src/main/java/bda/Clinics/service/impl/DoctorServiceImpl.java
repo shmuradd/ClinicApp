@@ -1,6 +1,8 @@
 package bda.Clinics.service.impl;
 
 import bda.Clinics.dao.model.Doctor;
+import bda.Clinics.dao.model.dto.request.RequestReviewDto;
+import bda.Clinics.dao.repository.ClinicRepository;
 import bda.Clinics.util.location.LocationOperation;
 import bda.Clinics.dao.model.dto.request.RequestDoctorDto;
 import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
@@ -25,46 +27,49 @@ public class DoctorServiceImpl implements DoctorService {
     @Qualifier("put")
     private final ModelMapper modelMapper;
     private final LocationOperation locationOperation;
+    private final ClinicRepository clinicRepository;
 
     public DoctorServiceImpl(DoctorRepository doctorRepository,
                              @Qualifier("put") ModelMapper modelMapper,
-                             LocationOperation locationOperation) {
+                             LocationOperation locationOperation, ClinicRepository clinicRepository) {
         this.doctorRepository = doctorRepository;
         this.modelMapper = modelMapper;
         this.locationOperation = locationOperation;
-    }
-@Override
-@Transactional
-public List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto) {
-
-    double radiusInKm = 10.0;  // 10 km radius
-
-    if (requestDoctorDto == null) {
-        throw new IllegalArgumentException("Request data cannot be null");
+        this.clinicRepository = clinicRepository;
     }
 
-    Specification<Doctor> spec = Specification
-            .where(DoctorSpecification.hasFullName(requestDoctorDto.getFullName()))
-            .and(DoctorSpecification.hasSpeciality(requestDoctorDto.getSpeciality()))
-            .and(DoctorSpecification.hasClinic(requestDoctorDto.getClinicName()));
-//            .and(DoctorSpecification.hasMoreThanXReviews(requestDoctorDto.getReviewCount()))
-//            .and(DoctorSpecification.hasMoreThanXRating(requestDoctorDto.getRatingCount()));
+    @Override
+    public List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto) {
 
-    List<ResponseDoctorDto> responseDoctorDtoList = doctorRepository.findAll(spec)
-            .stream()
-            .map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class))
-            .collect(Collectors.toList());
+        double radiusInKm = 10.0;  // 10 km radius
 
-    if (responseDoctorDtoList.isEmpty()) {
-        return Collections.emptyList();
+        if (requestDoctorDto == null) {
+            throw new IllegalArgumentException("Request data cannot be null");
+        }
+        if (requestDoctorDto.getLocation() == null || requestDoctorDto.getLocation().isEmpty()) {
+            requestDoctorDto.setLocation("Baku, Azerbaijan");
+        }
+
+
+        List<ResponseDoctorDto> responseDoctorDtoList = doctorRepository.findAll( Specification
+                        .where(DoctorSpecification.hasFullName(requestDoctorDto.getFullName()))
+                        .and(DoctorSpecification.hasSpeciality(requestDoctorDto.getSpeciality()))
+                        .and(DoctorSpecification.hasClinic(requestDoctorDto.getClinicName())))
+                .stream()
+                .map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class))
+                .collect(Collectors.toList());
+
+        if (responseDoctorDtoList.isEmpty()) {
+            List<ResponseDoctorDto> collect = doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
+            return locationOperation.doctorSearchForLocationSpecWithinRadius(collect, requestDoctorDto, radiusInKm);
+        } else {
+            return locationOperation.doctorSearchForLocationSpecWithinRadius(responseDoctorDtoList, requestDoctorDto, radiusInKm);
+        }
+
     }
-
-    return locationOperation.doctorSearchForLocationSpecWithinRadius(responseDoctorDtoList, requestDoctorDto, radiusInKm);
-}
 
 
     @Override
-    @Transactional
     public List<ResponseDoctorDto> findAll() {
         return doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
     }
