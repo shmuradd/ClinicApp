@@ -4,9 +4,11 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_CONNECTION-IP:localhost}:${DB_CONNECTION_PORT:5432}/postgres
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require
+    username: doadmin
+    password: AVNS_ouQvQEXjqECLLIypm8Y
+    hikari:
+      maximum-pool-size: 10
 
   jpa:
     show-sql: true
@@ -19,7 +21,7 @@ spring:
     generate-ddl: false
 
   liquibase:
-    change-log: db/changelog/db.changelog-master.yml
+    change-log: classpath:db/changelog/db.changelog-master.yml
     enabled: false
     drop-first: true
     default-schema: public

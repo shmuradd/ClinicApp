@@ -1,15 +1,14 @@
 package bda.Clinics.service;
 
-import bda.Clinics.dao.model.Review;
+import bda.Clinics.dao.model.dto.request.RequestReviewDto;
+import bda.Clinics.dao.model.dto.response.ResponseReviewDto;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ReviewService {
-    List<Review> getAllReviews();
-    Optional<Review> getReviewById(Long reviewId);
-    List<Review> getReviewsByDoctorId(Long doctorId);
-    Review saveReview(Review review);
-    void deleteReview(Long reviewId);
-    Review updateReview(Long reviewId, Review review);
+    void saveReview(Long doctorId, RequestReviewDto requestReviewDto);
+    void addReviewToDoctorByFullName(String fullName,String clinicName, RequestReviewDto reviewDto, String speciality);
+
+    List<ResponseReviewDto> getReviewsByDoctorId(Long doctorId);
 }

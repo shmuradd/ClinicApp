@@ -19,15 +19,6 @@ public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long patientId;
+    String fullName;
 
-    String firstName;
-    String lastName;
-    String email;
-    String phone;
-    String gender;
-    @Temporal(TemporalType.DATE)
-    Date dateOfBirth;
-
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    Set<Review> reviews;
 }
