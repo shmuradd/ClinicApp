@@ -12,7 +12,7 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResponseDoctorDto {
-
+    Long doctorId;
     String fullName;
     String speciality;
     String qualifications;
@@ -21,4 +21,6 @@ public class ResponseDoctorDto {
     String serviceDescription;
     Set<RequestClinicDto> clinics;
     Set<ResponseReviewDto> reviews;
+    String photoUrl;
+
 }

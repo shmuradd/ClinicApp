@@ -4,7 +4,6 @@ import bda.Clinics.dao.model.Doctor;
 import bda.Clinics.dao.model.Review;
 import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.dao.repository.ReviewRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

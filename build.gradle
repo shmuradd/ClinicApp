@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
 
@@ -24,8 +24,10 @@ repositories {
 }
 
 dependencies {
+	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0' // Downgrade for compatibility
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.liquibase:liquibase-core'
 	compileOnly 'org.projectlombok:lombok'
@@ -36,18 +38,11 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.1.1'
 
-
 	implementation group: 'com.google.maps', name: 'google-maps-services', version: '0.18.0'
 	implementation group: 'org.json', name: 'json', version: '20210307'
 
-	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4"
-	implementation "org.springdoc:springdoc-openapi-starter-webmvc-api:2.0.4"
-
-//	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
-//	implementation 'org.springdoc:springdoc-openapi-starter-common:2.0.2'
-
-
-	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.0'
+	// Use a compatible Jackson version for Spring Boot 3.3.3
+	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.16.2'
 }
 
 tasks.named('test') {

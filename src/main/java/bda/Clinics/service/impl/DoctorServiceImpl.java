@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -59,6 +60,8 @@ public class DoctorServiceImpl implements DoctorService {
                 .map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class))
                 .collect(Collectors.toList());
 
+        System.out.println("responseDoctorDtoList: " + responseDoctorDtoList.size()
+        );
         if (responseDoctorDtoList.isEmpty()) {
             List<ResponseDoctorDto> collect = doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
             return locationOperation.doctorSearchForLocationSpecWithinRadius(collect, requestDoctorDto, radiusInKm);
@@ -69,10 +72,26 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
 
+
+
     @Override
     public List<ResponseDoctorDto> findAll() {
-        return doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
+        return doctorRepository.findAll().stream()
+                .filter(Doctor::getIsActive)  // Filter to only include active doctors
+                .map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class))
+                .collect(Collectors.toList());
     }
+    @Override
+    public ResponseDoctorDto getById(Long doctorId)
+    {
+        Doctor doctor = doctorRepository.getDoctorByDoctorId(doctorId);
+        if (doctor != null) {
+            return modelMapper.map(doctor, ResponseDoctorDto.class);
+        } else {
+            return null;
+        }
+    }
+
 
 }
 

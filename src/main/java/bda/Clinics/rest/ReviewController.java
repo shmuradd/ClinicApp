@@ -15,6 +15,8 @@ import java.util.List;
 @RequestMapping("/api/v1/review")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000"}) // Both frontend URLs
+
 public class ReviewController {
     private final ReviewService reviewService;
 
