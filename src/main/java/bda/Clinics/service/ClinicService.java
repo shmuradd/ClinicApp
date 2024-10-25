@@ -1,13 +1,16 @@
 package bda.Clinics.service;
 
 import bda.Clinics.dao.model.Clinic;
-import bda.Clinics.dao.model.dto.response.ResponseClinicDto;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ClinicService {
-    public List<ResponseClinicDto> getAllClinics();
+    List<Clinic> getInactiveClinics();
+
+    void updateClinicStatus(Long clinicId, boolean isActive);
+
+    List<Clinic> getAllClinics();
 
     Optional<Clinic> getClinicById(Long clinicId);
 

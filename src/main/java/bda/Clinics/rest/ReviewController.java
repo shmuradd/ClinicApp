@@ -1,7 +1,9 @@
 package bda.Clinics.rest;
 
+import bda.Clinics.dao.model.Review;
 import bda.Clinics.dao.model.dto.request.RequestReviewDto;
 import bda.Clinics.dao.model.dto.response.ResponseReviewDto;
+import bda.Clinics.dao.model.enums.ReviewStatus;
 import bda.Clinics.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,4 +42,17 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
+    @GetMapping("/pending")
+    public ResponseEntity<List<Review>> getPendingReviews() {
+        List<Review> pendingReviews = reviewService.getPendingReviews();
+        return ResponseEntity.ok(pendingReviews);
+    }
+
+    @PutMapping("/{reviewId}/status")
+    public ResponseEntity<String> updateReviewStatus(@PathVariable Long reviewId,
+                                                     @RequestParam ReviewStatus newStatus) {
+        reviewService.updateReviewStatus(reviewId, newStatus);
+        return ResponseEntity.ok("Review status updated successfully.");
+    }
 }
+

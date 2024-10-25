@@ -19,6 +19,7 @@ public class ResponseDoctorDto {
     Double experience;
     String service;
     String serviceDescription;
+    Boolean isActive;
     Set<RequestClinicDto> clinics;
     Set<ResponseReviewDto> reviews;
     String photoUrl;

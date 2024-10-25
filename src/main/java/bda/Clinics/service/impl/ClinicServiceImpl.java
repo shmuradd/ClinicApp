@@ -1,33 +1,39 @@
 package bda.Clinics.service.impl;
 
 import bda.Clinics.dao.model.Clinic;
-import bda.Clinics.dao.model.dto.response.ResponseClinicDto;
 import bda.Clinics.dao.repository.ClinicRepository;
 import bda.Clinics.service.ClinicService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
-
 public class ClinicServiceImpl implements ClinicService {
-    @Autowired
-    private ClinicRepository clinicRepository;
+
+    private  final ClinicRepository clinicRepository;
 
     @Override
-    public List<ResponseClinicDto> getAllClinics() {
-        // Retrieve all clinics from the database
-        List<Clinic> clinics = clinicRepository.findAll();
+    public List<Clinic> getInactiveClinics() {
+        return clinicRepository.findByIsActiveFalse();
+    }
+    @Override
+    public void updateClinicStatus(Long clinicId, boolean isActive) {
+        Clinic clinic = clinicRepository.findById(clinicId)
+                .orElseThrow(() -> new RuntimeException("Clinic not found with ID: " + clinicId));
 
-        // Map each Clinic to ResponseClinicDto
-        return clinics.stream()
-                .map(clinic -> new ResponseClinicDto(clinic.getClinicName(), clinic.getLocation(), clinic.getContactDetails(), clinic.getCity())) // Adjust the mapping based on your entity structure
-                .collect(Collectors.toList());
+        clinic.setIsActive(isActive);
+        clinicRepository.save(clinic);
+        log.info("Clinic ID: {} status updated to {}", clinicId, isActive);
+    }
+
+    @Override
+    public List<Clinic> getAllClinics() {
+        return null;
     }
 
     @Override

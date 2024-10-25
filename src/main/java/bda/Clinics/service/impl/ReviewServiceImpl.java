@@ -5,10 +5,12 @@ import bda.Clinics.dao.model.Doctor;
 import bda.Clinics.dao.model.Review;
 import bda.Clinics.dao.model.dto.request.RequestReviewDto;
 import bda.Clinics.dao.model.dto.response.ResponseReviewDto;
+import bda.Clinics.dao.model.enums.ReviewStatus;
 import bda.Clinics.dao.repository.ClinicRepository;
 import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.dao.repository.ReviewRepository;
 import bda.Clinics.service.ReviewService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final ModelMapper modelMapper;
@@ -39,6 +42,7 @@ public class ReviewServiceImpl implements ReviewService {
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
         Review review = modelMapper.map(requestReviewDto, Review.class);
+        review.setStatus(ReviewStatus.PENDING);
         doctor.getReviews().add(review);
         doctorRepository.save(doctor);
     }
@@ -55,7 +59,7 @@ public class ReviewServiceImpl implements ReviewService {
             doctor = Doctor.builder()
                     .fullName(fullName)
                     .speciality(speciality)
-                    .isActive(true)
+                    .isActive(false)
                     .build();
         }
         Optional<Clinic> optionalClinic = clinicRepository.findByClinicName(clinicName);
@@ -65,7 +69,7 @@ public class ReviewServiceImpl implements ReviewService {
         } else {
             clinic = Clinic.builder()
                     .clinicName(clinicName)
-                    .isActive(true)
+                    .isActive(false)
                     .build();
             clinicRepository.save(clinic);
         }
@@ -78,11 +82,14 @@ public class ReviewServiceImpl implements ReviewService {
         if (doctor.getClinics() == null) {
             doctor.setClinics(new HashSet<>());
         }
+
+        review.setStatus(ReviewStatus.PENDING);
+        reviewRepository.save(review);
+
+        log.info("Review saved in PENDING status for Doctor: " + fullName);
         doctor.getClinics().add(clinic);
         doctorRepository.save(doctor);
     }
-
-
     @Override
     public List<ResponseReviewDto> getReviewsByDoctorId(Long doctorId) {
         Doctor doctor = doctorRepository.findById(doctorId)
@@ -92,6 +99,19 @@ public class ReviewServiceImpl implements ReviewService {
                 map(review -> modelMapper.map(review, ResponseReviewDto.class)).
                 collect(Collectors.toList());
         return collect;
+    }
+    @Override
+    public List<Review> getPendingReviews() {
+        return reviewRepository.findByStatus(ReviewStatus.PENDING);
+    }
+
+    @Override
+    public void updateReviewStatus(Long reviewId, ReviewStatus newStatus) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found with ID: " + reviewId));
+
+        review.setStatus(newStatus);
+        reviewRepository.save(review);
     }
 
 }
