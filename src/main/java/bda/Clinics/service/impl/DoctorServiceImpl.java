@@ -74,6 +74,17 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
     }
 
+    public List<Doctor> getInactiveDoctors() {
+        return doctorRepository.findByIsActiveFalse();
+    }
+    public void updateDoctorStatus(Long doctorId, boolean isActive) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + doctorId));
+
+        doctor.setIsActive(isActive);
+        doctorRepository.save(doctor);
+        log.info("Doctor ID: {} status updated to {}", doctorId, isActive);
+    }
 }
 
 

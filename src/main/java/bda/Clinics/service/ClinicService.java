@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ClinicService {
+    List<Clinic> getInactiveClinics();
+
+    void updateClinicStatus(Long clinicId, boolean isActive);
+
     List<Clinic> getAllClinics();
 
     Optional<Clinic> getClinicById(Long clinicId);
