@@ -5,6 +5,7 @@ import bda.Clinics.dao.model.dto.request.RequestClinicDto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalTime;
 import java.util.Set;
 
 @Data
@@ -12,17 +13,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ResponseDoctorDto {
+public class ResponseScheduleDto {
 
-    String fullName;
-    String speciality;
-    String qualifications;
-    Double experience;
-    String service;
-    String serviceDescription;
-    Boolean isActive;
-    Set<RequestClinicDto> clinics;
-    Set<ResponseReviewDto> reviews;
-    Set<ResponseScheduleDto> schedules;
+    Long scheduleId;
+    String weekDay;
+    LocalTime workingHoursFrom;
+    LocalTime workingHoursTo;
 
 }

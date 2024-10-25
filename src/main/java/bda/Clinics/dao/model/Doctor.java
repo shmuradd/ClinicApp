@@ -48,6 +48,7 @@ public class Doctor {
     Set<Review> reviews=new HashSet<>();
 
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "doctor_id", referencedColumnName = "doctorId")
     Set<Schedule> schedules=new HashSet<>();
 }

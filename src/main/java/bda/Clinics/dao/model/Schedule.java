@@ -22,9 +22,9 @@ public class Schedule {
     LocalTime workingHoursFrom;
     LocalTime workingHoursTo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id", nullable = false)
-    Doctor doctor;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "doctor_id", nullable = false)
+//    Doctor doctor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "clinic_id", nullable = false)

@@ -1,21 +1,29 @@
 package bda.Clinics.service.impl;
 
 import bda.Clinics.dao.model.Clinic;
+import bda.Clinics.dao.model.Schedule;
 import bda.Clinics.dao.repository.ClinicRepository;
 import bda.Clinics.service.ClinicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class ClinicServiceImpl implements ClinicService {
 
     private  final ClinicRepository clinicRepository;
+    private final ModelMapper modelMapper;
+
+    public ClinicServiceImpl(ClinicRepository clinicRepository,@Qualifier("patch") ModelMapper modelMapper) {
+        this.clinicRepository = clinicRepository;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public List<Clinic> getInactiveClinics() {
@@ -33,26 +41,38 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     public List<Clinic> getAllClinics() {
-        return null;
+        return clinicRepository.findAll();
     }
 
     @Override
-    public Optional<Clinic> getClinicById(Long clinicId) {
-        return Optional.empty();
+    public Clinic getClinicById(Long clinicId) {
+        return clinicRepository.findById(clinicId)
+                .orElseThrow(() -> new RuntimeException("Clinic not found with ID: " + clinicId));
     }
 
     @Override
-    public Clinic saveClinic(Clinic clinic) {
-        return null;
-    }
-
-    @Override
-    public void deleteClinic(Long clinicId) {
-
+    public Clinic createClinic(Clinic clinic) {
+        return clinicRepository.save(clinic);
     }
 
     @Override
     public Clinic updateClinic(Long clinicId, Clinic clinic) {
-        return null;
+        Clinic existingClinic = getClinicById(clinicId);
+        modelMapper.map(existingClinic,clinic);
+        return clinicRepository.save(existingClinic);
     }
+
+    @Override
+    public void deleteClinic(Long clinicId) {
+        clinicRepository.deleteById(clinicId);
+    }
+    public void addScheduleToClinic(Long clinicId, Schedule schedule) {
+        Clinic clinic = clinicRepository.findById(clinicId)
+                .orElseThrow(() -> new RuntimeException("Clinic not found with ID: " + clinicId));
+        schedule.setClinic(clinic);
+        clinic.getSchedules().add(schedule);
+        clinicRepository.save(clinic);
+    }
+
+
 }
