@@ -32,7 +32,7 @@ public class DoctorController {
     public ResponseEntity<List<ResponseDoctorDto>> findAll(@RequestBody RequestDoctorDto requestDoctorDto) {
         List<ResponseDoctorDto> doctorsBySpecialty = doctorService.getDoctorsBySpecialty(requestDoctorDto);
         List<ResponseDoctorDto> responseDoctorDtoList = doctorsBySpecialty.stream().filter(doctor -> doctor.getIsActive().equals(true))
-                .filter(doctor -> doctor.getReviews().stream().anyMatch(review -> review.getStatus().equals(ReviewStatus.APPROVED)))
+                .filter(doctor -> doctor.getReviews().stream().anyMatch(review -> review.getStatus()==ReviewStatus.APPROVED))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responseDoctorDtoList);
     }

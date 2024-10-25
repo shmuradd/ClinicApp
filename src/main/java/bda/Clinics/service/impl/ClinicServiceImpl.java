@@ -69,7 +69,6 @@ public class ClinicServiceImpl implements ClinicService {
     public void addScheduleToClinic(Long clinicId, Schedule schedule) {
         Clinic clinic = clinicRepository.findById(clinicId)
                 .orElseThrow(() -> new RuntimeException("Clinic not found with ID: " + clinicId));
-        schedule.setClinic(clinic);
         clinic.getSchedules().add(schedule);
         clinicRepository.save(clinic);
     }
