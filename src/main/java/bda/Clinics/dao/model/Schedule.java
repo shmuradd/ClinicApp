@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Entity
 @Table
@@ -21,13 +22,16 @@ public class Schedule {
     String weekDay;
     LocalTime workingHoursFrom;
     LocalTime workingHoursTo;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Schedule schedule = (Schedule) o;
+        return Objects.equals(weekDay, schedule.weekDay) && Objects.equals(workingHoursFrom, schedule.workingHoursFrom) && Objects.equals(workingHoursTo, schedule.workingHoursTo);
+    }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id", nullable = false)
-    Doctor doctor;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "clinic_id", nullable = false)
-    Clinic clinic;
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(weekDay, workingHoursFrom, workingHoursTo);
+    }
 }

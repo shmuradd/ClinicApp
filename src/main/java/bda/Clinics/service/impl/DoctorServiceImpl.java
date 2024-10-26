@@ -1,6 +1,8 @@
 package bda.Clinics.service.impl;
 
+import bda.Clinics.dao.model.Clinic;
 import bda.Clinics.dao.model.Doctor;
+import bda.Clinics.dao.model.Schedule;
 import bda.Clinics.dao.model.dto.request.RequestReviewDto;
 import bda.Clinics.dao.repository.ClinicRepository;
 import bda.Clinics.util.location.LocationOperation;
@@ -27,14 +29,18 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorRepository doctorRepository;
     @Qualifier("put")
     private final ModelMapper modelMapper;
+    @Qualifier("patch")
+    private  final ModelMapper modelMapperPatch;
     private final LocationOperation locationOperation;
     private final ClinicRepository clinicRepository;
 
     public DoctorServiceImpl(DoctorRepository doctorRepository,
                              @Qualifier("put") ModelMapper modelMapper,
+                             @Qualifier("patch") ModelMapper modelMapperPatch,
                              LocationOperation locationOperation, ClinicRepository clinicRepository) {
         this.doctorRepository = doctorRepository;
         this.modelMapper = modelMapper;
+        this.modelMapperPatch = modelMapperPatch;
         this.locationOperation = locationOperation;
         this.clinicRepository = clinicRepository;
     }
@@ -93,6 +99,58 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
 
+    public List<Doctor> getInactiveDoctors() {
+        return doctorRepository.findByIsActiveFalse();
+    }
+    public void updateDoctorStatus(Long doctorId, boolean isActive) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + doctorId));
+
+        doctor.setIsActive(isActive);
+        doctorRepository.save(doctor);
+        log.info("Doctor ID: {} status updated to {}", doctorId, isActive);
+    }
+    @Override
+    public List<Doctor> getAllDoctors() {
+        return doctorRepository.findAll();
+    }
+
+    @Override
+    public Doctor getDoctorById(Long doctorId) {
+        return doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + doctorId));
+    }
+
+    @Override
+    public Doctor createDoctor(Doctor doctor) {
+        return doctorRepository.save(doctor);
+    }
+
+    @Override
+    public Doctor updateDoctor(Long doctorId, Doctor doctor) {
+        Doctor existingDoctor = getDoctorById(doctorId);
+        modelMapperPatch.map(existingDoctor,doctor);
+        return doctorRepository.save(existingDoctor);
+    }
+
+    @Override
+    public void deleteDoctor(Long doctorId) {
+        doctorRepository.deleteById(doctorId);
+    }
+    @Override
+    public void addClinicToDoctor(Long doctorId, Clinic clinic) {
+        Doctor doctor = getDoctorById(doctorId);
+        doctor.getClinics().add(clinic);
+        doctorRepository.save(doctor);
+    }
+
+    public void addScheduleToDoctor(Long doctorId, Schedule schedule) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + doctorId));
+
+        doctor.getSchedules().add(schedule);
+        doctorRepository.save(doctor);
+    }
 }
 
 

@@ -1,6 +1,7 @@
 package bda.Clinics.dao.model.dto.response;
 
 import bda.Clinics.dao.model.Doctor;
+import bda.Clinics.dao.model.enums.ReviewStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,4 +17,5 @@ public class ResponseReviewDto {
     String comment;
     Date reviewDate;
     String fullName;
+    ReviewStatus status;
 }
