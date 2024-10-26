@@ -10,6 +10,7 @@ import bda.Clinics.dao.repository.ClinicRepository;
 import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.dao.repository.ReviewRepository;
 import bda.Clinics.service.ReviewService;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Service
+@Slf4j
 public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final ModelMapper modelMapper;

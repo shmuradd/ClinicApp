@@ -1,5 +1,6 @@
 package bda.Clinics.dao.model.dto.response;
 
+import bda.Clinics.dao.model.Schedule;
 import bda.Clinics.dao.model.dto.request.RequestClinicDto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,9 +20,10 @@ public class ResponseDoctorDto {
     Double experience;
     String service;
     String serviceDescription;
+    Boolean isActive;
     Set<RequestClinicDto> clinics;
     Set<ResponseReviewDto> reviews;
     String photoUrl;
-    Boolean isActive;
+    Set<ResponseScheduleDto> schedules;
 
 }

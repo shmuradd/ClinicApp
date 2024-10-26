@@ -14,6 +14,9 @@ public interface DoctorRepository extends JpaRepository<Doctor,Long> , JpaSpecif
     @EntityGraph(value = "doctor.clinics")
     List<Doctor> findAll();
     Optional<Doctor> findByFullName(String fullName);
+    @Query("SELECT MAX(d.doctorId) FROM Doctor d")
+    Long findMaxDoctorId();
+    Doctor getDoctorByDoctorId(Long doctorId);
     List<Doctor> findByIsActiveFalse();
 
 }
