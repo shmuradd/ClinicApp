@@ -13,4 +13,6 @@ public class RequestReviewDto {
      String comment;
      String fullName;
 
+     Long parentReviewId;
+
 }

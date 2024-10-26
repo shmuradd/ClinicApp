@@ -26,6 +26,7 @@ public class ReviewController {
         reviewService.saveReview(doctorId, requestReviewDto);
     }
 
+
     @PostMapping("/reviews")
     public void addReviewWithClinic(@RequestParam String fullName,
                                     @RequestParam String clinicName,

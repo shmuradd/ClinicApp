@@ -22,5 +22,6 @@ public class ResponseDoctorDto {
     Set<RequestClinicDto> clinics;
     Set<ResponseReviewDto> reviews;
     String photoUrl;
+    Boolean isActive;
 
 }

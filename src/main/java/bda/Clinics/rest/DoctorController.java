@@ -4,6 +4,7 @@ import bda.Clinics.dao.model.Doctor;
 import bda.Clinics.dao.model.Review;
 import bda.Clinics.dao.model.dto.request.RequestDoctorDto;
 import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
+import bda.Clinics.dao.model.enums.ReviewStatus;
 import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.service.DoctorService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/doctor")
@@ -22,48 +24,31 @@ import java.util.List;
 
 public class DoctorController {
     private final DoctorService doctorService;
-    private final DoctorRepository doctorRepository;
-
-
-    @GetMapping
-    public ResponseEntity<List<ResponseDoctorDto>> findAll(
-            @RequestBody RequestDoctorDto requestDoctorDto,
-            @RequestParam(value = "sortBy", required = false) String sortBy) {
-
-        // Retrieve the list of doctors
-        List<ResponseDoctorDto> doctors = doctorService.getDoctorsBySpecialty(requestDoctorDto);
-
-        // Sort by review count if requested
-        if ("reviewCount".equalsIgnoreCase(sortBy)) {
-            doctors.sort(Comparator.comparingInt((ResponseDoctorDto doctor) -> doctor.getReviews().size()).reversed());
-        }
-        // Sort by average rating if requested
-        else if ("averageRating".equalsIgnoreCase(sortBy)) {
-            doctors.sort(Comparator.comparingDouble((ResponseDoctorDto doctor) ->
-                    doctor.getReviews().stream()
-                            .mapToInt(review -> review.getRating())  // Replace method reference with lambda
-                            .average()
-                            .orElse(0.0)
-            ).reversed());
-        }
-
-        // Return the sorted list
-        return ResponseEntity.ok(doctors);
+    @GetMapping("/doctors/inactive")
+    public ResponseEntity<List<Doctor>> getInactiveDoctors() {
+        List<Doctor> inactiveDoctors = doctorService.getInactiveDoctors();
+        return ResponseEntity.ok(inactiveDoctors);
     }
-
-
-
-
-
+    @GetMapping
+    public ResponseEntity<List<ResponseDoctorDto>> findAll(@RequestBody RequestDoctorDto requestDoctorDto){
+        List<ResponseDoctorDto> doctorsBySpecialty = doctorService.getDoctorsBySpecialty(requestDoctorDto);
+        List<ResponseDoctorDto> responseDoctorDtoList=doctorsBySpecialty.stream().filter(doctor -> doctor.getIsActive().equals(true))
+                .filter(doctor->doctor.getReviews().stream().anyMatch(review->review.getStatus().equals(ReviewStatus.APPROVED)))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDoctorDtoList);
+    }
     @GetMapping("/all")
     public List<ResponseDoctorDto> find(){
-        return doctorService.findAll();
+        List<ResponseDoctorDto> responseDoctorDtos = doctorService.findAll();
+        List<ResponseDoctorDto> responseDoctorDtoList=responseDoctorDtos.stream().filter(doctor -> doctor.getIsActive().equals(true))
+                .filter(doctor->doctor.getReviews().stream().anyMatch(review->review.getStatus()==ReviewStatus.APPROVED))
+                .collect(Collectors.toList());
+        return responseDoctorDtoList;
     }
-    @GetMapping("/{doctorId}")
-    public ResponseEntity<ResponseDoctorDto> getById(@PathVariable Long doctorId) {
-        ResponseDoctorDto response = doctorService.getById(doctorId);
-        return ResponseEntity.ok(response);
-
+    @PutMapping("/{doctorId}/status")
+    public ResponseEntity<Void> updateDoctorStatus(@PathVariable Long doctorId, @RequestParam boolean isActive) {
+        doctorService.updateDoctorStatus(doctorId, isActive);
+        return ResponseEntity.noContent().build();
     }
 
 }

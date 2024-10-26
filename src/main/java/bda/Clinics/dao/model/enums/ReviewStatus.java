@@ -1,4 +1,7 @@
 package bda.Clinics.dao.model.enums;
 
-public class ReviewStatus {
+public enum ReviewStatus {
+    PENDING,
+    APPROVED,
+    REJECTED
 }
