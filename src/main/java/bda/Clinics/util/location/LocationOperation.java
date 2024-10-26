@@ -26,11 +26,13 @@ public class LocationOperation {
     private static final String GEOCODING_API_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     private static final String API_KEY = "AIzaSyCt-YiA9TJ2hNVuVWbytkAcbqEMga-nGLs"; // Add your Google API key here
 
+
     public LocationOperation() {
         this.geoApiContext = new GeoApiContext.Builder()
                 .apiKey("AIzaSyCt-YiA9TJ2hNVuVWbytkAcbqEMga-nGLs") // Replace with your API key
                 .build();
     }
+
 
     public String[] extractCoordinatesFromGoogleMapsLink(String googleMapLink) {
         log.info("Parsing Google Maps link: {}", googleMapLink);
@@ -62,16 +64,26 @@ public class LocationOperation {
 
     public double calculateDistance(double userLat, double userLon, double clinicLat, double clinicLon) {
         final int R = 6371; // Radius of the Earth in kilometers
+
+        // Convert degrees to radians
         double latDistance = Math.toRadians(clinicLat - userLat);
         double lonDistance = Math.toRadians(clinicLon - userLon);
+
+        // Apply the Haversine formula
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2) +
                 Math.cos(Math.toRadians(userLat)) * Math.cos(Math.toRadians(clinicLat)) *
                         Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
+
+        // Distance in kilometers
+        double distance = R * c;
+
+        return distance;
     }
 
     public UserLocation getUserLocation(String location) {
+
         if (location == null || location.isEmpty()) {
             // Return default Baku coordinates
             UserLocation bakuLocation = new UserLocation();
@@ -112,6 +124,8 @@ public class LocationOperation {
         throw new RuntimeException("Failed to convert location to coordinates.");
     }
 
+
+
     public List<ResponseDoctorDto> doctorSearchForLocationSpecWithinRadius(List<ResponseDoctorDto> doctorDtoList, RequestDoctorDto requestDoctorDto, double radiusInKm) {
         UserLocation userLocation = getUserLocation(requestDoctorDto.getLocation());
 
@@ -129,18 +143,18 @@ public class LocationOperation {
                                         double clinicLon = Double.parseDouble(clinicCoordinates[1]);
                                         double distance = calculateDistance(userLocation.getUserLat(), userLocation.getUserLon(), clinicLat, clinicLon);
                                         clinic.setDistance(distance); // Set distance to clinic for future use
-                                        log.info("Clinic {}: Distance from user: {}", clinic.getClinicName(), distance);
+                                        log.info("Clinic {}: Distance from user: {}", clinic.getClinicName(), clinic.getDistance());
                                     } catch (NumberFormatException e) {
                                         log.error("Error parsing clinic coordinates for clinic: {}", clinic.getCity(), e);
                                     }
                                 }
                                 return clinic;
                             })
-                            .filter(clinic -> clinic.getDistance() != null && clinic.getDistance() <= radiusInKm)
+                            .filter(clinic -> clinic.getDistance() <= radiusInKm)
                             .sorted(Comparator.comparingDouble(RequestClinicDto::getDistance))
                             .collect(Collectors.toList());
-
                     doctorDto.setClinics(new HashSet<>(clinicsWithinRadius));
+
                     return doctorDto;
                 })
                 .filter(doctorDto -> !doctorDto.getClinics().isEmpty())

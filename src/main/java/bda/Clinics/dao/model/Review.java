@@ -32,6 +32,12 @@ public class Review {
     ReviewStatus status = ReviewStatus.PENDING;
     @CreationTimestamp
     Date reviewDate;
+    // Parent review to create the nested structure
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_review_id")
+    @JsonBackReference
+    Review parentReview;
+
 
     @Override
     public boolean equals(Object o) {

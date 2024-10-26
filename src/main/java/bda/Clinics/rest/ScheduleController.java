@@ -15,6 +15,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/schedules")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000"}) // Both frontend URLs
+
 public class ScheduleController {
     private final ScheduleService scheduleService;
     private final ClinicService clinicService;

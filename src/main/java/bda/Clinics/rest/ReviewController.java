@@ -55,5 +55,13 @@ public class ReviewController {
         reviewService.updateReviewStatus(reviewId, newStatus);
         return ResponseEntity.ok("Review status updated successfully.");
     }
+
+    @PostMapping("/{parentReviewId}/reply")
+    public ResponseEntity<String> addReplyToReview(@PathVariable Long parentReviewId,
+                                                   @RequestBody RequestReviewDto replyDto) {
+        reviewService.addReplyToReview(parentReviewId, replyDto);
+        return ResponseEntity.ok("Reply added successfully.");
+    }
+
 }
 

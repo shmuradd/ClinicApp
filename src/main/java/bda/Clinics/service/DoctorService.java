@@ -13,7 +13,6 @@ public interface DoctorService {
     List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto);
 
     List<ResponseDoctorDto> findAll();
-    public ResponseDoctorDto getById(Long doctorId);
     List<Doctor> getInactiveDoctors();
     void updateDoctorStatus(Long doctorId, boolean isActive);
     List<Doctor> getAllDoctors();

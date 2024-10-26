@@ -30,7 +30,6 @@ public class ReviewServiceImpl implements ReviewService {
     private final ModelMapper modelMapper;
     private final DoctorRepository doctorRepository;
     private final ClinicRepository clinicRepository;
-    private static final Logger log = LoggerFactory.getLogger(ReviewServiceImpl.class);
 
 
     public ReviewServiceImpl(ReviewRepository reviewRepository, @Qualifier("put") ModelMapper modelMapper, DoctorRepository doctorRepository, ClinicRepository clinicRepository) {
@@ -116,5 +115,21 @@ public class ReviewServiceImpl implements ReviewService {
         review.setStatus(newStatus);
         reviewRepository.save(review);
     }
+    @Override
+    public void addReplyToReview(Long parentReviewId, RequestReviewDto replyDto) {
+        Review parentReview = reviewRepository.findById(parentReviewId)
+                .orElseThrow(() -> new RuntimeException("Parent review not found with ID: " + parentReviewId));
+
+        // Map the DTO to a Review entity for the reply
+        Review reply = modelMapper.map(replyDto, Review.class);
+        reply.setParentReview(parentReview);
+        reply.setStatus(ReviewStatus.PENDING); // Set default status
+
+        // Save the reply
+        reviewRepository.save(reply);
+
+        log.info("Reply saved with parent review ID: " + parentReviewId);
+    }
+
 
 }
