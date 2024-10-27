@@ -67,8 +67,10 @@ public class DoctorServiceImpl implements DoctorService {
                 .collect(Collectors.toList());
 
         if (responseDoctorDtoList.isEmpty()) {
-            List<ResponseDoctorDto> collect = doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
-            return locationOperation.doctorSearchForLocationSpecWithinRadius(collect, requestDoctorDto, radiusInKm);
+//            List<ResponseDoctorDto> collect = doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
+//            return locationOperation.doctorSearchForLocationSpecWithinRadius(collect, requestDoctorDto, radiusInKm);
+//
+            return Collections.emptyList();
         } else {
             return locationOperation.doctorSearchForLocationSpecWithinRadius(responseDoctorDtoList, requestDoctorDto, radiusInKm);
         }
