@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table
@@ -25,13 +26,29 @@ public class Review {
     String fullName;
     int rating;
     String comment;
-    Boolean conditionAgreed;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
     ReviewStatus status = ReviewStatus.PENDING;
     @CreationTimestamp
     Date reviewDate;
+    // Parent review to create the nested structure
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_review_id")
+    @JsonBackReference
+    Review parentReview;
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Review review = (Review) o;
+        return rating == review.rating && Objects.equals(fullName, review.fullName) && Objects.equals(comment, review.comment) && status == review.status && Objects.equals(reviewDate, review.reviewDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fullName, rating, comment, status, reviewDate);
+    }
 }

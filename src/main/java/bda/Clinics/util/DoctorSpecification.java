@@ -14,9 +14,10 @@ public class DoctorSpecification {
             if (fullName == null || fullName.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.equal(
+            return criteriaBuilder.like(
                     criteriaBuilder.lower(doctorRoot.get("fullName")),
-                    fullName.toLowerCase());
+                    "%" + fullName.toLowerCase() + "%"
+            );
         };
     }
 
@@ -25,9 +26,10 @@ public class DoctorSpecification {
             if (speciality == null || speciality.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.equal(
+            return criteriaBuilder.like(
                     criteriaBuilder.lower(doctorRoot.get("speciality")),
-                    speciality.toLowerCase());
+                    "%"+speciality.toLowerCase()+"%"
+            );
         };
     }
 
@@ -37,9 +39,10 @@ public class DoctorSpecification {
                 return criteriaBuilder.conjunction();
             }
             Join<Doctor, Clinic> doctorClinicJoin = doctorRoot.join("clinics");
-            return criteriaBuilder.equal(
+            return criteriaBuilder.like(
                     criteriaBuilder.lower(doctorClinicJoin.get("clinicName")),
-                    clinicName.toLowerCase());
+                    "%"+clinicName.toLowerCase()+"%"
+            );
         };
     }
 

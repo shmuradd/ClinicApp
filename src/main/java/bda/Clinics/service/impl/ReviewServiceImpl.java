@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Slf4j
@@ -113,5 +115,21 @@ public class ReviewServiceImpl implements ReviewService {
         review.setStatus(newStatus);
         reviewRepository.save(review);
     }
+    @Override
+    public void addReplyToReview(Long parentReviewId, RequestReviewDto replyDto) {
+        Review parentReview = reviewRepository.findById(parentReviewId)
+                .orElseThrow(() -> new RuntimeException("Parent review not found with ID: " + parentReviewId));
+
+        // Map the DTO to a Review entity for the reply
+        Review reply = modelMapper.map(replyDto, Review.class);
+        reply.setParentReview(parentReview);
+        reply.setStatus(ReviewStatus.PENDING); // Set default status
+
+        // Save the reply
+        reviewRepository.save(reply);
+
+        log.info("Reply saved with parent review ID: " + parentReviewId);
+    }
+
 
 }

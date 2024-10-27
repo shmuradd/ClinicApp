@@ -15,4 +15,10 @@ public class RequestClinicDto {
      String contactDetails;
      String city;
      Double distance;
+
+     public Double getDistance() {
+          return distance != null ? distance : Double.MAX_VALUE;
+     }
+
 }
+
