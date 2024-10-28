@@ -43,12 +43,12 @@ public class Doctor {
     Set<Clinic> clinics=new HashSet<>();
 
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "doctor_id", referencedColumnName = "doctorId")
     Set<Review> reviews=new HashSet<>();
 
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "doctor_id", referencedColumnName = "doctorId")
     Set<Schedule> schedules=new HashSet<>();
 }

@@ -64,7 +64,7 @@ public class ClinicServiceImpl implements ClinicService {
     @Override
     public Clinic updateClinic(Long clinicId, Clinic clinic) {
         Clinic existingClinic = getClinicById(clinicId);
-        modelMapper.map(existingClinic,clinic);
+        modelMapper.map(clinic,existingClinic);
         return clinicRepository.save(existingClinic);
     }
 
