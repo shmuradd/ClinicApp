@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/doctor")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000"}) // Both frontend URLs
+@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000", "https://topdoc.com.az/"}) // Both frontend URLs
 
 public class DoctorController {
     private final DoctorService doctorService;
@@ -42,6 +42,13 @@ public class DoctorController {
         List<ResponseDoctorDto> responseDoctorDtoList = doctorsBySpecialty.stream().filter(doctor -> doctor.getIsActive().equals(true))
                 .filter(doctor -> doctor.getReviews().stream().anyMatch(review -> review.getStatus()==ReviewStatus.APPROVED))
                 .collect(Collectors.toList());
+
+        // Sort based on the sortBy parameter from the request
+        if ("reviewCount".equalsIgnoreCase(requestDoctorDto.getSortBy())) {
+            responseDoctorDtoList.sort(Comparator.comparingInt(ResponseDoctorDto::getReviewCount).reversed());
+        } else if ("rating".equalsIgnoreCase(requestDoctorDto.getSortBy())) {
+            responseDoctorDtoList.sort(Comparator.comparingDouble(ResponseDoctorDto::getRating).reversed());
+        }
         return ResponseEntity.ok(responseDoctorDtoList);
     }
 
@@ -67,8 +74,8 @@ public class DoctorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Doctor> getDoctorById(@PathVariable Long id) {
-        Doctor doctor = doctorService.getDoctorById(id);
+    public ResponseEntity<ResponseDoctorDto> getDoctorById(@PathVariable Long id) {
+        ResponseDoctorDto doctor = doctorService.getDoctorDtoById(id);
         return ResponseEntity.ok(doctor);
     }
 

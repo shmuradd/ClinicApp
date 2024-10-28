@@ -12,6 +12,7 @@ import bda.Clinics.dao.repository.ReviewRepository;
 import bda.Clinics.service.ReviewService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springdoc.api.OpenApiResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -131,5 +132,18 @@ public class ReviewServiceImpl implements ReviewService {
         log.info("Reply saved with parent review ID: " + parentReviewId);
     }
 
+    @Override
+    public List<ResponseReviewDto> getRepliesToReview(Long parentReviewId) {
+        Review parentReview = reviewRepository.findById(parentReviewId)
+                .orElseThrow(() -> new OpenApiResourceNotFoundException("Review not found"));
+
+        // Fetch replies using the parent review reference
+        List<Review> replies = reviewRepository.findByParentReview(parentReview);
+
+        // Convert replies to DTOs and return
+        return replies.stream()
+                .map(reply -> modelMapper.map(reply, ResponseReviewDto.class)) // Convert replies to DTOs
+                .collect(Collectors.toList());
+    }
 
 }

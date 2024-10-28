@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api/v1/review")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000"}) // Both frontend URLs
+@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000", "https://topdoc.com.az/"}) // Both frontend URLs
 
 public class ReviewController {
     private final ReviewService reviewService;
@@ -61,6 +61,12 @@ public class ReviewController {
                                                    @RequestBody RequestReviewDto replyDto) {
         reviewService.addReplyToReview(parentReviewId, replyDto);
         return ResponseEntity.ok("Reply added successfully.");
+    }
+
+    @GetMapping("/{parentReviewId}/replies")
+    public ResponseEntity<List<ResponseReviewDto>> getRepliesToReview(@PathVariable Long parentReviewId) {
+        List<ResponseReviewDto> replies = reviewService.getRepliesToReview(parentReviewId);
+        return ResponseEntity.ok(replies);
     }
 
 }

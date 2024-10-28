@@ -20,7 +20,7 @@ public interface DoctorService {
     Doctor createDoctor(Doctor doctor);
     Doctor updateDoctor(Long doctorId, Doctor doctor);
     void deleteDoctor(Long doctorId);
-
+    ResponseDoctorDto getDoctorDtoById(Long doctorId);
     void addClinicToDoctor(Long doctorId, Clinic clinic);
     void addScheduleToDoctor(Long doctorId, Schedule schedule);
 

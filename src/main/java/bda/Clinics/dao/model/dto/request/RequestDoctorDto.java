@@ -15,4 +15,5 @@ public class RequestDoctorDto {
     String location;
     Double reviewCount;
     Double ratingCount;
+    String sortBy;
 }

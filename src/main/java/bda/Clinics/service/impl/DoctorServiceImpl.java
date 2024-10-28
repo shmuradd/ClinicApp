@@ -103,6 +103,12 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + doctorId));
     }
+    // Method to return the ResponseDoctorDto for the controller
+    @Override
+    public ResponseDoctorDto getDoctorDtoById(Long doctorId) {
+        Doctor doctor = getDoctorById(doctorId); // Use the entity method here
+        return modelMapper.map(doctor, ResponseDoctorDto.class); // Convert to DTO
+    }
 
     @Override
     public Doctor createDoctor(Doctor doctor) {

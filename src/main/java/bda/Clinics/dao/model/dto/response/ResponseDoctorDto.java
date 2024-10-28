@@ -25,5 +25,17 @@ public class ResponseDoctorDto {
     Set<ResponseReviewDto> reviews;
     String photoUrl;
     Set<ResponseScheduleDto> schedules;
+    // Calculate review count from reviews
+    public int getReviewCount() {
+        return reviews != null ? reviews.size() : 0;
+    }
 
+    // Calculate average rating from reviews
+    public double getRating() {
+        return reviews != null && !reviews.isEmpty() ?
+                reviews.stream()
+                        .mapToDouble(ResponseReviewDto::getRating)
+                        .average()
+                        .orElse(0.0) : 0.0;
+    }
 }
