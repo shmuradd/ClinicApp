@@ -18,5 +18,6 @@ public interface DoctorRepository extends JpaRepository<Doctor,Long> , JpaSpecif
     Long findMaxDoctorId();
     Doctor getDoctorByDoctorId(Long doctorId);
     List<Doctor> findByIsActiveFalse();
-
+    @Query("SELECT DISTINCT d.speciality FROM Doctor d WHERE d.speciality IS NOT NULL")
+    List<String> findDistinctSpecialities();
 }

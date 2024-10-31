@@ -66,10 +66,8 @@ public class DoctorServiceImpl implements DoctorService {
                 .collect(Collectors.toList());
 
         if (responseDoctorDtoList.isEmpty()) {
-//            List<ResponseDoctorDto> collect = doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
-//            return locationOperation.doctorSearchForLocationSpecWithinRadius(collect, requestDoctorDto, radiusInKm);
-//
-            return Collections.emptyList();
+            List<ResponseDoctorDto> collect = doctorRepository.findAll().stream().map(doctor -> modelMapper.map(doctor, ResponseDoctorDto.class)).collect(Collectors.toList());
+            return locationOperation.doctorSearchForLocationSpecWithinRadius(collect, requestDoctorDto, radiusInKm);
         } else {
             return locationOperation.doctorSearchForLocationSpecWithinRadius(responseDoctorDtoList, requestDoctorDto, radiusInKm);
         }
@@ -103,12 +101,6 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + doctorId));
     }
-    // Method to return the ResponseDoctorDto for the controller
-    @Override
-    public ResponseDoctorDto getDoctorDtoById(Long doctorId) {
-        Doctor doctor = getDoctorById(doctorId); // Use the entity method here
-        return modelMapper.map(doctor, ResponseDoctorDto.class); // Convert to DTO
-    }
 
     @Override
     public Doctor createDoctor(Doctor doctor) {
@@ -140,4 +132,10 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.getSchedules().add(schedule);
         doctorRepository.save(doctor);
     }
+    @Override
+    public List<String> getDistinctSpecialities() {
+        return doctorRepository.findDistinctSpecialities();
+    }
 }
+
+

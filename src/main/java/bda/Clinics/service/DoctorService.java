@@ -23,5 +23,6 @@ public interface DoctorService {
     ResponseDoctorDto getDoctorDtoById(Long doctorId);
     void addClinicToDoctor(Long doctorId, Clinic clinic);
     void addScheduleToDoctor(Long doctorId, Schedule schedule);
+    List<String> getDistinctSpecialities();
 
 }

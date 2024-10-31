@@ -1,10 +1,5 @@
 package bda.Clinics.rest;
 
-import bda.Clinics.dao.model.Doctor;
-import bda.Clinics.dao.model.Review;
-import bda.Clinics.dao.model.dto.request.RequestDoctorDto;
-import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
-import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.dao.model.Clinic;
 import bda.Clinics.dao.model.Doctor;
 import bda.Clinics.dao.model.Schedule;
@@ -17,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,8 +19,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/doctor")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000", "https://topdoc.com.az/"}) // Both frontend URLs
-
 public class DoctorController {
     private final DoctorService doctorService;
 
@@ -36,19 +28,12 @@ public class DoctorController {
         return ResponseEntity.ok(inactiveDoctors);
     }
 
-    @PostMapping("/specification")
+    @GetMapping("/specification")
     public ResponseEntity<List<ResponseDoctorDto>> findAll(@RequestBody RequestDoctorDto requestDoctorDto) {
         List<ResponseDoctorDto> doctorsBySpecialty = doctorService.getDoctorsBySpecialty(requestDoctorDto);
         List<ResponseDoctorDto> responseDoctorDtoList = doctorsBySpecialty.stream().filter(doctor -> doctor.getIsActive().equals(true))
                 .filter(doctor -> doctor.getReviews().stream().anyMatch(review -> review.getStatus()==ReviewStatus.APPROVED))
                 .collect(Collectors.toList());
-
-        // Sort based on the sortBy parameter from the request
-        if ("reviewCount".equalsIgnoreCase(requestDoctorDto.getSortBy())) {
-            responseDoctorDtoList.sort(Comparator.comparingInt(ResponseDoctorDto::getReviewCount).reversed());
-        } else if ("rating".equalsIgnoreCase(requestDoctorDto.getSortBy())) {
-            responseDoctorDtoList.sort(Comparator.comparingDouble(ResponseDoctorDto::getRating).reversed());
-        }
         return ResponseEntity.ok(responseDoctorDtoList);
     }
 
@@ -74,8 +59,8 @@ public class DoctorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseDoctorDto> getDoctorById(@PathVariable Long id) {
-        ResponseDoctorDto doctor = doctorService.getDoctorDtoById(id);
+    public ResponseEntity<Doctor> getDoctorById(@PathVariable Long id) {
+        Doctor doctor = doctorService.getDoctorById(id);
         return ResponseEntity.ok(doctor);
     }
 
@@ -101,4 +86,10 @@ public class DoctorController {
         doctorService.addClinicToDoctor(doctorId, clinic);
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/specialties")
+    public List<String> getSpecialties() {
+        return doctorService.getDistinctSpecialities();
+    }
 }
+
+
