@@ -36,7 +36,7 @@ public class DoctorController {
         return ResponseEntity.ok(inactiveDoctors);
     }
 
-    @GetMapping("/specification")
+    @PostMapping("/specification")
     public ResponseEntity<List<ResponseDoctorDto>> findAll(@RequestBody RequestDoctorDto requestDoctorDto) {
         List<ResponseDoctorDto> doctorsBySpecialty = doctorService.getDoctorsBySpecialty(requestDoctorDto);
         List<ResponseDoctorDto> responseDoctorDtoList = doctorsBySpecialty.stream().filter(doctor -> doctor.getIsActive().equals(true))

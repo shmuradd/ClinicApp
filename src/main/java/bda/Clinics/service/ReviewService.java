@@ -18,4 +18,5 @@ public interface ReviewService {
     void updateReviewStatus(Long reviewId, ReviewStatus newStatus);
     public void addReplyToReview(Long parentReviewId, RequestReviewDto replyDto);
     public List<ResponseReviewDto> getRepliesToReview(Long parentReviewId);
+    public List<ResponseReviewDto> getAllReviews();
 }

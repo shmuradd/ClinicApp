@@ -43,6 +43,10 @@ dependencies {
 
 	// Use a compatible Jackson version for Spring Boot 3.3.3
 	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.16.2'
+
+
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
 }
 
 tasks.named('test') {

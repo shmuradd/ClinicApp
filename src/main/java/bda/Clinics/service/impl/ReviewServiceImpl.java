@@ -145,5 +145,12 @@ public class ReviewServiceImpl implements ReviewService {
                 .map(reply -> modelMapper.map(reply, ResponseReviewDto.class)) // Convert replies to DTOs
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<ResponseReviewDto> getAllReviews() {
+        List<Review> reviews = reviewRepository.findAll();
+        return reviews.stream()
+                .map(review -> modelMapper.map(review, ResponseReviewDto.class))
+                .collect(Collectors.toList());
+    }
 
 }

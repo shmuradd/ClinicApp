@@ -68,6 +68,10 @@ public class ReviewController {
         List<ResponseReviewDto> replies = reviewService.getRepliesToReview(parentReviewId);
         return ResponseEntity.ok(replies);
     }
-
+    @GetMapping("/all")
+    public ResponseEntity<List<ResponseReviewDto>> getAllReviews() {
+        List<ResponseReviewDto> allReviews = reviewService.getAllReviews();
+        return ResponseEntity.ok(allReviews);
+    }
 }
 
