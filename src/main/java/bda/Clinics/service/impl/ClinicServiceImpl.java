@@ -1,23 +1,18 @@
 package bda.Clinics.service.impl;
 
-import bda.Clinics.dao.model.Clinic;
-import bda.Clinics.dao.model.dto.response.ResponseClinicDto;
+import bda.Clinics.dao.model.entity.Clinic;
 import bda.Clinics.dao.repository.ClinicRepository;
 import bda.Clinics.service.ClinicService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import bda.Clinics.dao.model.Schedule;
-import bda.Clinics.dao.repository.ClinicRepository;
-import bda.Clinics.service.ClinicService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import bda.Clinics.dao.model.entity.Schedule;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static ch.qos.logback.core.joran.spi.ConsoleTarget.findByName;
 
 @Service
 @Slf4j
@@ -80,4 +75,7 @@ public class ClinicServiceImpl implements ClinicService {
     }
 
 
+    public Clinic saveClinic(Clinic clinic) {
+        return clinicRepository.save(clinic);
+    }
 }

@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RequestReviewDto {
+     Long reviewId;
      int rating;
      String comment;
      String fullName;

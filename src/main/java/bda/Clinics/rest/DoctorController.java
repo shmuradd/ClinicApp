@@ -1,26 +1,45 @@
 package bda.Clinics.rest;
 
-import bda.Clinics.dao.model.Clinic;
-import bda.Clinics.dao.model.Doctor;
-import bda.Clinics.dao.model.Schedule;
+import bda.Clinics.dao.model.entity.Clinic;
+import bda.Clinics.dao.model.entity.Doctor;
 import bda.Clinics.dao.model.dto.request.RequestDoctorDto;
 import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
 import bda.Clinics.dao.model.enums.ReviewStatus;
+import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.service.DoctorService;
+import bda.Clinics.service.impl.DoctorServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/doctor")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "http://64.226.99.16:3000",
+        "https://topdoc.com.az/",
+        "https://topdoc.com.az"}) // Both frontend URLs
+
 public class DoctorController {
     private final DoctorService doctorService;
+    private final DoctorRepository doctorRepository;
+    private final DoctorServiceImpl doctorServiceImpl;
 
     @GetMapping("/doctors/inactive")
     public ResponseEntity<List<Doctor>> getInactiveDoctors() {
@@ -28,22 +47,52 @@ public class DoctorController {
         return ResponseEntity.ok(inactiveDoctors);
     }
 
-    @GetMapping("/specification")
-    public ResponseEntity<List<ResponseDoctorDto>> findAll(@RequestBody RequestDoctorDto requestDoctorDto) {
+    @PostMapping("/specification")
+    public ResponseEntity<List<ResponseDoctorDto>> findAll(@RequestBody RequestDoctorDto requestDoctorDto,
+        @RequestParam(required = false) String sortBy) {
         List<ResponseDoctorDto> doctorsBySpecialty = doctorService.getDoctorsBySpecialty(requestDoctorDto);
-        List<ResponseDoctorDto> responseDoctorDtoList = doctorsBySpecialty.stream().filter(doctor -> doctor.getIsActive().equals(true))
-                .filter(doctor -> doctor.getReviews().stream().anyMatch(review -> review.getStatus()==ReviewStatus.APPROVED))
+        // Filter active doctors with approved reviews
+        List<ResponseDoctorDto> responseDoctorDtoList = doctorsBySpecialty.stream()
+                .filter(doctor -> doctor.getIsActive().equals(true))
+                .filter(doctor -> doctor.getReviews().stream().anyMatch(review -> review.getStatus() == ReviewStatus.APPROVED))
+                // Filter by minimum review count if specified
+                .filter(doctor -> requestDoctorDto.getReviewCount() == null ||
+                        doctor.getReviews().size() >= requestDoctorDto.getReviewCount())
+                // Filter by minimum rating if specified
+                .filter(doctor -> requestDoctorDto.getRatingCount() == null ||
+                        doctor.getRating() >= requestDoctorDto.getRatingCount())
                 .collect(Collectors.toList());
+
+        // Sort based on provided criteria
+        if (sortBy == null || sortBy.isEmpty()) {
+            responseDoctorDtoList.sort(Comparator.comparingDouble(doctorService::getMinimumClinicDistance));
+        } else if ("reviewCount".equalsIgnoreCase(sortBy)) {
+            responseDoctorDtoList.sort(Comparator.comparingInt((ResponseDoctorDto doctor) -> doctor.getReviews().size()).reversed());
+        } else if ("rating".equalsIgnoreCase(sortBy)) {
+            responseDoctorDtoList.sort(Comparator.comparing(ResponseDoctorDto::getRating).reversed());
+        }
+
         return ResponseEntity.ok(responseDoctorDtoList);
     }
 
     @GetMapping("/all")
     public List<ResponseDoctorDto> findAll() {
         List<ResponseDoctorDto> responseDoctorDtos = doctorService.findAll();
-        List<ResponseDoctorDto> responseDoctorDtoList = responseDoctorDtos.stream().filter(doctor -> doctor.getIsActive().equals(true))
-                .filter(doctor -> doctor.getReviews().stream().anyMatch(review -> review.getStatus() == ReviewStatus.APPROVED))
-                .collect(Collectors.toList());
-        return responseDoctorDtoList;
+
+
+
+        // Sort doctors: inactive doctors first
+        responseDoctorDtos.sort((doctor1, doctor2) -> {
+            boolean doctor1Inactive = !doctor1.getIsActive();
+            boolean doctor2Inactive = !doctor2.getIsActive();
+
+            // Return doctor1 first if inactive, else doctor2
+            return Boolean.compare(doctor1Inactive, doctor2Inactive);
+        });
+        Collections.reverse(responseDoctorDtos);
+
+
+        return responseDoctorDtos;
     }
 
     @PutMapping("/{doctorId}/status")
@@ -59,16 +108,22 @@ public class DoctorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Doctor> getDoctorById(@PathVariable Long id) {
-        Doctor doctor = doctorService.getDoctorById(id);
+    public ResponseEntity<ResponseDoctorDto> getDoctorById(@PathVariable Long id) {
+        ResponseDoctorDto doctor = doctorService.getDoctorDtoById(id);
         return ResponseEntity.ok(doctor);
     }
 
-    @PostMapping
-    public ResponseEntity<Doctor> createDoctor(@RequestBody Doctor doctor) {
-        Doctor createdDoctor = doctorService.createDoctor(doctor);
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<Doctor> createDoctor(
+            @RequestPart("doctor") RequestDoctorDto doctorDto,
+            @RequestPart("photo") MultipartFile photo) throws IOException {
+
+        Doctor createdDoctor = doctorService.createDoctor(doctorDto, photo);
         return ResponseEntity.ok(createdDoctor);
     }
+
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Doctor> updateDoctor(@PathVariable Long id, @RequestBody Doctor doctor) {
@@ -89,6 +144,12 @@ public class DoctorController {
     @GetMapping("/specialties")
     public List<String> getSpecialties() {
         return doctorService.getDistinctSpecialities();
+    }
+
+    @PutMapping("/{id}/toggle-status")
+    public ResponseEntity<Doctor> toggleDoctorStatus(@PathVariable Long id) {
+        Doctor updatedDoctor = doctorService.toggleDoctorStatus(id);
+        return ResponseEntity.ok(updatedDoctor);
     }
 }
 

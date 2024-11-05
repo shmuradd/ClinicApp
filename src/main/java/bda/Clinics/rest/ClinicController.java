@@ -1,14 +1,11 @@
 package bda.Clinics.rest;
 
-import bda.Clinics.dao.model.Clinic;
-import bda.Clinics.dao.model.dto.response.ResponseClinicDto;
+import bda.Clinics.dao.model.entity.Clinic;
 import bda.Clinics.service.ClinicService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import bda.Clinics.service.ClinicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/clinics")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000", "https://topdoc.com.az/"}) // Both frontend URLs
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "http://64.226.99.16:3000",
+        "https://topdoc.com.az/",
+        "https://topdoc.com.az"}) // Both frontend URLs
 public class ClinicController {
     private final ClinicService clinicService;
     @GetMapping("/clinics/inactive")

@@ -1,9 +1,8 @@
 package bda.Clinics.util;
 
-import bda.Clinics.dao.model.Clinic;
-import bda.Clinics.dao.model.Doctor;
-import bda.Clinics.dao.model.Review;
-import bda.Clinics.util.location.LocationOperation;
+import bda.Clinics.dao.model.entity.Clinic;
+import bda.Clinics.dao.model.entity.Doctor;
+import bda.Clinics.dao.model.entity.Review;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -39,9 +38,12 @@ public class DoctorSpecification {
                 return criteriaBuilder.conjunction();
             }
             Join<Doctor, Clinic> doctorClinicJoin = doctorRoot.join("clinics");
-            return criteriaBuilder.like(
-                    criteriaBuilder.lower(doctorClinicJoin.get("clinicName")),
-                    "%"+clinicName.toLowerCase()+"%"
+            return criteriaBuilder.and(
+                    criteriaBuilder.equal(doctorClinicJoin.get("isActive"), true),
+                    criteriaBuilder.like(
+                            criteriaBuilder.lower(doctorClinicJoin.get("clinicName")),
+                            "%" + clinicName.toLowerCase() + "%"
+                    )
             );
         };
     }

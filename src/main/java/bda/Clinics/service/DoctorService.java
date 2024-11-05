@@ -1,13 +1,15 @@
 package bda.Clinics.service;
 
-import bda.Clinics.dao.model.Clinic;
-import bda.Clinics.dao.model.Doctor;
-import bda.Clinics.dao.model.Schedule;
+import bda.Clinics.dao.model.entity.Clinic;
+import bda.Clinics.dao.model.entity.Doctor;
+import bda.Clinics.dao.model.entity.Schedule;
 import bda.Clinics.dao.model.dto.request.RequestDoctorDto;
 import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
-import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface DoctorService {
     List<ResponseDoctorDto> getDoctorsBySpecialty(RequestDoctorDto requestDoctorDto);
@@ -24,5 +26,10 @@ public interface DoctorService {
     void addClinicToDoctor(Long doctorId, Clinic clinic);
     void addScheduleToDoctor(Long doctorId, Schedule schedule);
     List<String> getDistinctSpecialities();
+    double getMinimumClinicDistance(ResponseDoctorDto doctor);
+    void sortDoctors(List<ResponseDoctorDto> doctors, String sortBy);
+    Doctor toggleDoctorStatus(Long doctorId);
 
+    Optional<Doctor> findDoctorByFullNameAndSpeciality(String fullName, String speciality);
+    Doctor createDoctor(RequestDoctorDto doctorDto, MultipartFile photo) throws IOException;
 }

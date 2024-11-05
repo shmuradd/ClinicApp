@@ -1,6 +1,6 @@
 package bda.Clinics.rest;
 
-import bda.Clinics.dao.model.Schedule;
+import bda.Clinics.dao.model.entity.Schedule;
 import bda.Clinics.dao.model.dto.request.RequestScheduleDto;
 import bda.Clinics.service.ClinicService;
 import bda.Clinics.service.DoctorService;
@@ -15,7 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/schedules")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://64.226.99.16:3000", "https://topdoc.com.az/"}) // Both frontend URLs
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "http://64.226.99.16:3000",
+        "https://topdoc.com.az/",
+        "https://topdoc.com.az"}) // Both frontend URLs
 
 public class ScheduleController {
     private final ScheduleService scheduleService;

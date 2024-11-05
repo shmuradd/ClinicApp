@@ -1,6 +1,5 @@
-package bda.Clinics.dao.model;
+package bda.Clinics.dao.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

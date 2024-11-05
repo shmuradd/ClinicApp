@@ -1,7 +1,7 @@
-package bda.Clinics.dao.model;
+package bda.Clinics.dao.model.entity;
 
+import bda.Clinics.service.ClinicService;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,7 +17,7 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString
-
+@Getter
 @NamedEntityGraph(name = "doctor.clinics",
         attributeNodes = @NamedAttributeNode("clinics") )
 public class Doctor {
@@ -51,4 +51,13 @@ public class Doctor {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "doctor_id", referencedColumnName = "doctorId")
     Set<Schedule> schedules=new HashSet<>();
+
+    public boolean isActive() {
+        return this.isActive;
+    }
+    // Method to add a clinic to the doctor
+    public void addClinics(Clinic clinic) {
+        this.clinics.add(clinic);
+    }
+
 }

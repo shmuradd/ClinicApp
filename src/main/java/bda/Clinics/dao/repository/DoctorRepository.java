@@ -1,7 +1,6 @@
 package bda.Clinics.dao.repository;
 
-import bda.Clinics.dao.model.Doctor;
-import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
+import bda.Clinics.dao.model.entity.Doctor;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -20,4 +19,10 @@ public interface DoctorRepository extends JpaRepository<Doctor,Long> , JpaSpecif
     List<Doctor> findByIsActiveFalse();
     @Query("SELECT DISTINCT d.speciality FROM Doctor d WHERE d.speciality IS NOT NULL")
     List<String> findDistinctSpecialities();
+
+    @EntityGraph(value = "doctor.clinics", type = EntityGraph.EntityGraphType.LOAD)
+    Optional<Doctor> findById(Long id);
+
+    Optional<Doctor> findByFullNameAndSpeciality(String fullName, String speciality);
+
 }

@@ -1,6 +1,6 @@
 package bda.Clinics.service.impl;
 
-import bda.Clinics.dao.model.Schedule;
+import bda.Clinics.dao.model.entity.Schedule;
 import bda.Clinics.dao.repository.ScheduleRepository;
 import bda.Clinics.service.ScheduleService;
 import org.springframework.stereotype.Service;

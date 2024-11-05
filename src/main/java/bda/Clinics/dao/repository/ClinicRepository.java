@@ -1,8 +1,7 @@
 package bda.Clinics.dao.repository;
 
-import bda.Clinics.dao.model.Clinic;
+import bda.Clinics.dao.model.entity.Clinic;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;

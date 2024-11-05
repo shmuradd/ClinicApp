@@ -1,6 +1,6 @@
 package bda.Clinics.service;
 
-import bda.Clinics.dao.model.Schedule;
+import bda.Clinics.dao.model.entity.Schedule;
 import java.util.List;
 
 public interface ScheduleService {

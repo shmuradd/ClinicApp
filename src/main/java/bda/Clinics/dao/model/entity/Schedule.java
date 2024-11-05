@@ -1,4 +1,4 @@
-package bda.Clinics.dao.model;
+package bda.Clinics.dao.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

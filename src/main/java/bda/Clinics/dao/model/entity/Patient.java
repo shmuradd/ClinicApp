@@ -1,10 +1,7 @@
-package bda.Clinics.dao.model;
+package bda.Clinics.dao.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Date;
-import java.util.Set;
 
 
 @Entity

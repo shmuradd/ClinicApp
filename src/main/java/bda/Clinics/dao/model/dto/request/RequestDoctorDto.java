@@ -2,6 +2,7 @@ package bda.Clinics.dao.model.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @NoArgsConstructor
@@ -15,5 +16,6 @@ public class RequestDoctorDto {
     String location;
     Double reviewCount;
     Double ratingCount;
-    String sortBy;
+    String serviceDescription;
+
 }

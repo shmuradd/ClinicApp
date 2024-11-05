@@ -1,8 +1,7 @@
-package bda.Clinics.dao.model;
+package bda.Clinics.dao.model.entity;
 
 import bda.Clinics.dao.model.enums.ReviewStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +17,8 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Getter
+@Setter
 public class Review {
 
     @Id
@@ -37,7 +38,13 @@ public class Review {
     @JoinColumn(name = "parent_review_id")
     @JsonBackReference
     Review parentReview;
+    Boolean isActive;
 
+    // Relationship with Doctor
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "doctor_id")
+    @JsonBackReference
+    Doctor doctor;
 
     @Override
     public boolean equals(Object o) {
