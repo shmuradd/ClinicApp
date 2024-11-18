@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: 02
+      author: qedirbabayev
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                 name: user_id
+                 type: INT
+                 autoIncrement: true
+                 constraints:
+                  primaryKey: true
+              - column:
+                 name: email_confirmed
+                 type: BOOLEAN
+                 constraints:
+                  nullable: false
+              - column:
+                 name: fullname
+                 type: VARCHAR(255)
+              - column:
+                 name: confirmation_token
+                 type: VARCHAR(255)
+              - column:
+                 name: email
+                 type: VARCHAR(255)
+                 constraints:
+                  nullable: false
+              - column:
+                 name: password
+                 type: VARCHAR(255)
+                 constraints:
+                  nullable: false
+              - column:
+                 name: user_type_id
+                 type: INT
+                 constraints:
+                  nullable: false
+        - addForeignKeyConstraint:
+           baseTableName: users
+           baseColumnNames: user_type_id
+           constraintName: fk_user_user_type
+           referencedTableName: user_types
+           referencedColumnNames: user_type_id

@@ -1,0 +1,27 @@
+server:
+  port: 8090
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require
+    username: doadmin
+    password: AVNS_ouQvQEXjqECLLIypm8Y
+    hikari:
+      maximum-pool-size: 10
+
+  jpa:
+    show-sql: true
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+    generate-ddl: false
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yml
+    enabled: false
+    drop-first: true
+    default-schema: public

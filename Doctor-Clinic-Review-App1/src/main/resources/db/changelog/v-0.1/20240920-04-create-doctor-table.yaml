@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 04
+      author: qedirbabayev
+      changes:
+        - createTable:
+            tableName: doctors
+            columns:
+              - column:
+                 name: doctor_id
+                 type: INT
+                 autoIncrement: true
+                 constraints:
+                  primaryKey: true
+              - column:
+                 name: name
+                 type: VARCHAR(255)
+                 constraints:
+                   nullable: false
+              - column:
+                 name: specialty
+                 type: VARCHAR(255)
+                 constraints:
+                   nullable: false
+              - column:
+                 name: photo_url
+                 type: VARCHAR(255)
+              - column:
+                  name: qualifications
+                  type: VARCHAR(255)
+              - column:
+                  name: experience
+                  type: INT
+              - column:
+                  name: photos
+                  type: VARCHAR(255)
+              - column:
+                 name: is_active
+                 type: BOOLEAN

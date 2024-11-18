@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 07
+      author: qedirbabayev
+      changes:
+        - createTable:
+            tableName: doctor_clinics
+            columns:
+              - column:
+                 name: doctor_id
+                 type: INT
+                 autoIncrement: true
+                 constraints:
+                  primaryKey: true
+              - column:
+                 name: clinic_id
+                 type: INT
+                 constraints:
+                   nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: doctor_clinics
+            baseColumnNames: doctor_id
+            constraintName: fk_doctor_clinic_doctor
+            referencedTableName: doctors
+            referencedColumnNames: doctor_id
+
+        - addForeignKeyConstraint:
+            baseTableName: doctor_clinics
+            baseColumnNames: clinic_id
+            constraintName: fk_doctor_clinic_clinic
+            referencedTableName: clinics
+            referencedColumnNames: clinic_id

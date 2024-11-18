@@ -1,0 +1,235 @@
+[33mcommit 4c0f1d02af7507c09ccfc787637c1ffbc2ed6247[m
+Author: shmuradd <sharifov.murad29@gmail.com>
+Date:   Tue Oct 15 22:28:51 2024 +0400
+
+    Web Config and search by reviewNumber is working
+
+[1mdiff --git a/src/main/resources/application.yml b/src/main/resources/application.yml[m
+[1mindex 5a08da9..c609498 100644[m
+[1m--- a/src/main/resources/application.yml[m
+[1m+++ b/src/main/resources/application.yml[m
+[36m@@ -4,22 +4,22 @@[m [mserver:[m
+ spring:[m
+   datasource:[m
+     driver-class-name: org.postgresql.Driver[m
+[31m-    url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require[m
+[31m-    username: doadmin[m
+[31m-    password: your-password-here[m
+[31m-    hikari:[m
+[31m-      maximum-pool-size: 10[m
+[32m+[m[32m    url: jdbc:postgresql://${DB_CONNECTION-IP:localhost}:${DB_CONNECTION_PORT:5432}/postgres[m
+[32m+[m[32m    username: ${DB_USERNAME}[m
+[32m+[m[32m    password: ${DB_PASSWORD}[m
+ [m
+   jpa:[m
+     show-sql: true[m
+     open-in-view: true[m
+     hibernate:[m
+       ddl-auto: update[m
+[31m-      format_sql: true[m
+[32m+[m[32m    properties:[m
+[32m+[m[32m      hibernate:[m
+[32m+[m[32m        format_sql: true[m
+     generate-ddl: false[m
+ [m
+   liquibase:[m
+     change-log: db/changelog/db.changelog-master.yml[m
+     enabled: false[m
+     drop-first: true[m
+[31m-    default-schema: public[m
+[32m+[m[32m    default-schema: public[m
+\ No newline at end of file[m
+
+[33mcommit 3e2546e0502e68f9d40c9d3e55c4af7d255aaeb6[m
+Author: shmuradd <sharifov.murad29@gmail.com>
+Date:   Tue Oct 15 22:05:38 2024 +0400
+
+    All here
+
+[1mdiff --git a/src/main/resources/application.yml b/src/main/resources/application.yml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..5a08da9[m
+[1m--- /dev/null[m
+[1m+++ b/src/main/resources/application.yml[m
+[36m@@ -0,0 +1,25 @@[m
+[32m+[m[32mserver:[m
+[32m+[m[32m  port: 8090[m
+[32m+[m
+[32m+[m[32mspring:[m
+[32m+[m[32m  datasource:[m
+[32m+[m[32m    driver-class-name: org.postgresql.Driver[m
+[32m+[m[32m    url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require[m
+[32m+[m[32m    username: doadmin[m
+[32m+[m[32m    password: your-password-here[m
+[32m+[m[32m    hikari:[m
+[32m+[m[32m      maximum-pool-size: 10[m
+[32m+[m
+[32m+[m[32m  jpa:[m
+[32m+[m[32m    show-sql: true[m
+[32m+[m[32m    open-in-view: true[m
+[32m+[m[32m    hibernate:[m
+[32m+[m[32m      ddl-auto: update[m
+[32m+[m[32m      format_sql: true[m
+[32m+[m[32m    generate-ddl: false[m
+[32m+[m
+[32m+[m[32m  liquibase:[m
+[32m+[m[32m    change-log: db/changelog/db.changelog-master.yml[m
+[32m+[m[32m    enabled: false[m
+[32m+[m[32m    drop-first: true[m
+[32m+[m[32m    default-schema: public[m
+
+[33mcommit bb6837dc618c886ffdef741c13b2eec423da3b9b[m
+Author: shmuradd <sharifov.murad29@gmail.com>
+Date:   Tue Oct 15 20:46:22 2024 +0400
+
+    Web Config and search by reviewNumber is working
+
+[1mdiff --git a/src/main/resources/application.yml b/src/main/resources/application.yml[m
+[1mdeleted file mode 100644[m
+[1mindex 219944e..0000000[m
+[1m--- a/src/main/resources/application.yml[m
+[1m+++ /dev/null[m
+[36m@@ -1,25 +0,0 @@[m
+[31m-server:[m
+[31m-  port: 8090[m
+[31m-[m
+[31m-spring:[m
+[31m-  datasource:[m
+[31m-    driver-class-name: org.postgresql.Driver[m
+[31m-    url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require[m
+[31m-    username: doadmin[m
+[31m-    password: AVNS_ouQvQEXjqECLLIypm8Y[m
+[31m-    hikari:[m
+[31m-      maximum-pool-size: 10[m
+[31m-[m
+[31m-  jpa:[m
+[31m-    show-sql: true[m
+[31m-    open-in-view: true[m
+[31m-    hibernate:[m
+[31m-      ddl-auto: update[m
+[31m-      format_sql: true[m
+[31m-    generate-ddl: false[m
+[31m-[m
+[31m-  liquibase:[m
+[31m-    change-log: db/changelog/db.changelog-master.yml[m
+[31m-    enabled: false[m
+[31m-    drop-first: true[m
+[31m-    default-schema: public[m
+
+[33mcommit 9a8788eeaf6c07663ea996fc05f963344a2dc37c[m
+Author: shmuradd <sharifov.murad29@gmail.com>
+Date:   Mon Oct 14 20:35:19 2024 +0400
+
+    connected to Digital Ocean remote server IP request example: http://64.226.99.16:8090/api/v1/doctor
+
+[1mdiff --git a/src/main/resources/application.yml b/src/main/resources/application.yml[m
+[1mindex f648f05..219944e 100644[m
+[1m--- a/src/main/resources/application.yml[m
+[1m+++ b/src/main/resources/application.yml[m
+[36m@@ -5,8 +5,8 @@[m [mspring:[m
+   datasource:[m
+     driver-class-name: org.postgresql.Driver[m
+     url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require[m
+[31m-    username:  ${DB_USERNAME}[m
+[31m-    password: ${DB_PASSWORD}[m
+[32m+[m[32m    username: doadmin[m
+[32m+[m[32m    password: AVNS_ouQvQEXjqECLLIypm8Y[m
+     hikari:[m
+       maximum-pool-size: 10[m
+ [m
+
+[33mcommit 12d6190e8da47310dfebbd2065c3526cf2ec5cd4[m
+Author: shmuradd <sharifov.murad29@gmail.com>
+Date:   Thu Oct 10 23:34:43 2024 +0400
+
+    connected to Digital Ocean remote server IP request example: http://64.226.99.16:8090/api/v1/doctor
+
+[1mdiff --git a/src/main/resources/application.yml b/src/main/resources/application.yml[m
+[1mindex 4c738b2..f648f05 100644[m
+[1m--- a/src/main/resources/application.yml[m
+[1m+++ b/src/main/resources/application.yml[m
+[36m@@ -4,18 +4,18 @@[m [mserver:[m
+ spring:[m
+   datasource:[m
+     driver-class-name: org.postgresql.Driver[m
+[31m-    url: jdbc:postgresql://${DB_CONNECTION-IP:localhost}:${DB_CONNECTION_PORT:5432}/postgres[m
+[31m-    username: ${DB_CONNECTION_USERNAME:postgres}[m
+[31m-    password: ${DB_CONNECTION_PASSWORD:12345}[m
+[32m+[m[32m    url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require[m
+[32m+[m[32m    username:  ${DB_USERNAME}[m
+[32m+[m[32m    password: ${DB_PASSWORD}[m
+[32m+[m[32m    hikari:[m
+[32m+[m[32m      maximum-pool-size: 10[m
+ [m
+   jpa:[m
+     show-sql: true[m
+     open-in-view: true[m
+     hibernate:[m
+       ddl-auto: update[m
+[31m-    properties:[m
+[31m-      hibernate:[m
+[31m-        format_sql: true[m
+[32m+[m[32m      format_sql: true[m
+     generate-ddl: false[m
+ [m
+   liquibase:[m
+
+[33mcommit 0ca797f8e7ae8460172eef39f1d363987a5707e3[m
+Author: shmuradd <sharifov.murad29@gmail.com>
+Date:   Wed Oct 9 18:39:11 2024 +0400
+
+    Geolocation works properly
+
+[1mdiff --git a/src/main/resources/application.yml b/src/main/resources/application.yml[m
+[1mindex 6869af4..4c738b2 100644[m
+[1m--- a/src/main/resources/application.yml[m
+[1m+++ b/src/main/resources/application.yml[m
+[36m@@ -1,9 +1,12 @@[m
+[32m+[m[32mserver:[m
+[32m+[m[32m  port: 8090[m
+[32m+[m
+ spring:[m
+   datasource:[m
+     driver-class-name: org.postgresql.Driver[m
+     url: jdbc:postgresql://${DB_CONNECTION-IP:localhost}:${DB_CONNECTION_PORT:5432}/postgres[m
+     username: ${DB_CONNECTION_USERNAME:postgres}[m
+[31m-    password: ${DB_CONNECTION_PASSWORD:mysecretpassword}[m
+[32m+[m[32m    password: ${DB_CONNECTION_PASSWORD:12345}[m
+ [m
+   jpa:[m
+     show-sql: true[m
+
+[33mcommit 73c3cba0a7389160fcc614ff8ce5da03df7500ae[m
+Author: Qedir <qedirbabayev3@gmail.com>
+Date:   Wed Oct 9 00:59:56 2024 +0400
+
+    add
+
+[1mdiff --git a/src/main/resources/application.yml b/src/main/resources/application.yml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..6869af4[m
+[1m--- /dev/null[m
+[1m+++ b/src/main/resources/application.yml[m
+[36m@@ -0,0 +1,22 @@[m
+[32m+[m[32mspring:[m
+[32m+[m[32m  datasource:[m
+[32m+[m[32m    driver-class-name: org.postgresql.Driver[m
+[32m+[m[32m    url: jdbc:postgresql://${DB_CONNECTION-IP:localhost}:${DB_CONNECTION_PORT:5432}/postgres[m
+[32m+[m[32m    username: ${DB_CONNECTION_USERNAME:postgres}[m
+[32m+[m[32m    password: ${DB_CONNECTION_PASSWORD:mysecretpassword}[m
+[32m+[m
+[32m+[m[32m  jpa:[m
+[32m+[m[32m    show-sql: true[m
+[32m+[m[32m    open-in-view: true[m
+[32m+[m[32m    hibernate:[m
+[32m+[m[32m      ddl-auto: update[m
+[32m+[m[32m    properties:[m
+[32m+[m[32m      hibernate:[m
+[32m+[m[32m        format_sql: true[m
+[32m+[m[32m    generate-ddl: false[m
+[32m+[m
+[32m+[m[32m  liquibase:[m
+[32m+[m[32m    change-log: db/changelog/db.changelog-master.yml[m
+[32m+[m[32m    enabled: false[m
+[32m+[m[32m    drop-first: true[m
+[32m+[m[32m    default-schema: public[m

@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 05
+      author: qedirbabayev
+      changes:
+        - createTable:
+            tableName: doctor_duty
+            columns:
+              - column:
+                 name: doctor_duty_id
+                 type: INT
+                 autoIncrement: true
+                 constraints:
+                  primaryKey: true
+              - column:
+                 name: doctor_id
+                 type: INT
+                 constraints:
+                   nullable: false
+              - column:
+                 name: service_name
+                 type: VARCHAR(255)
+                 constraints:
+                   nullable: false
+              - column:
+                 name: description
+                 type: VARCHAR(255)
+        - addForeignKeyConstraint:
+           baseTableName: doctor_duty
+           baseColumnNames: doctor_duty_id
+           constraintName: fk_doctor_duty_doctor
+           referencedTableName: doctors
+           referencedColumnNames: doctor_id
