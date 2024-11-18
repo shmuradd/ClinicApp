@@ -3,6 +3,8 @@ package bda.Clinics.dao.model.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,6 +18,7 @@ public class RequestClinicDto {
      String contactDetails;
      String city;
      Double distance;
+     List<RequestScheduleDto> schedules; // List of schedules for this clinic
 
      public Double getDistance() {
           return distance != null ? distance : Double.MAX_VALUE;

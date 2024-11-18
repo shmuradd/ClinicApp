@@ -5,8 +5,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require
-    username: doadmin
-    password: AVNS_ouQvQEXjqECLLIypm8Y
+    username:
+    password:
     hikari:
       maximum-pool-size: 10
   web:
@@ -38,7 +38,7 @@ project:
 
 
 cloudinary:
-  cloud-name: du25ep0gr
-  api-key: 692984156171973
+  cloud-name:
+  api-key: 
   api-secret: 8vuJlBI_b0QuUgLB4AepD-3DBZI
 

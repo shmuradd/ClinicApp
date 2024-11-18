@@ -7,4 +7,6 @@ public class RequestScheduleDto {
     private String weekDay;
     private String workingHoursFrom;
     private String workingHoursTo;
+    private Long doctorId;  // ID of the doctor
+    private Long clinicId;  // ID of the clinic
 }

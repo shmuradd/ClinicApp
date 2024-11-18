@@ -7,6 +7,7 @@ import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
 import bda.Clinics.dao.model.enums.ReviewStatus;
 import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.service.DoctorService;
+import bda.Clinics.service.impl.CloudinaryService;
 import bda.Clinics.service.impl.DoctorServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.print.Doc;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,7 +42,7 @@ public class DoctorController {
     private final DoctorService doctorService;
     private final DoctorRepository doctorRepository;
     private final DoctorServiceImpl doctorServiceImpl;
-
+    private final CloudinaryService cloudinaryService;
     @GetMapping("/doctors/inactive")
     public ResponseEntity<List<Doctor>> getInactiveDoctors() {
         List<Doctor> inactiveDoctors = doctorService.getInactiveDoctors();
@@ -49,12 +51,12 @@ public class DoctorController {
 
     @PostMapping("/specification")
     public ResponseEntity<List<ResponseDoctorDto>> findAll(@RequestBody RequestDoctorDto requestDoctorDto,
-        @RequestParam(required = false) String sortBy) {
+                                                           @RequestParam(required = false) String sortBy) {
         List<ResponseDoctorDto> doctorsBySpecialty = doctorService.getDoctorsBySpecialty(requestDoctorDto);
-        // Filter active doctors with approved reviews
+
+        // Filter active doctors with no approved reviews
         List<ResponseDoctorDto> responseDoctorDtoList = doctorsBySpecialty.stream()
                 .filter(doctor -> doctor.getIsActive().equals(true))
-                .filter(doctor -> doctor.getReviews().stream().anyMatch(review -> review.getStatus() == ReviewStatus.APPROVED))
                 // Filter by minimum review count if specified
                 .filter(doctor -> requestDoctorDto.getReviewCount() == null ||
                         doctor.getReviews().size() >= requestDoctorDto.getReviewCount())
@@ -74,6 +76,7 @@ public class DoctorController {
 
         return ResponseEntity.ok(responseDoctorDtoList);
     }
+
 
     @GetMapping("/all")
     public List<ResponseDoctorDto> findAll() {
@@ -126,10 +129,23 @@ public class DoctorController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<Doctor> updateDoctor(@PathVariable Long id, @RequestBody Doctor doctor) {
-        Doctor updatedDoctor = doctorService.updateDoctor(id, doctor);
-        return ResponseEntity.ok(updatedDoctor);
+    public void updateDoctor(
+            @PathVariable Long id,
+            @RequestPart("doctor") RequestDoctorDto doctorDto,
+            @RequestPart("photo") MultipartFile photo) throws IOException {
+        Long realId=34L;
+        Doctor realDoctor=doctorRepository.findById(realId).orElseThrow();
+        realDoctor.setFullName(doctorDto.getFullName());
+        // Handle the photo upload if provided
+        if (photo != null && !photo.isEmpty()) {
+            String photoUrl = cloudinaryService.uploadImage(photo);
+            realDoctor.setPhotoUrl(photoUrl);
+        }
+
+        // Call the service to update the doctor
+        //Doctor updatedDoctor = doctorService.updateDoctor(id, doctor);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {

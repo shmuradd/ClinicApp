@@ -31,8 +31,9 @@ public class Doctor {
     String qualifications;
     Double experience;
     String service;
-    String serviceDescription;
-    Boolean isActive;
+    @Lob
+    @Column(name = "service_description", columnDefinition = "TEXT") // Optional column definition for specific DB types
+    private String serviceDescription;    Boolean isActive;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonBackReference
@@ -45,11 +46,13 @@ public class Doctor {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "doctor_id", referencedColumnName = "doctorId")
+    @JsonBackReference
     Set<Review> reviews=new HashSet<>();
 
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "doctor_id", referencedColumnName = "doctorId")
+    @JsonBackReference
     Set<Schedule> schedules=new HashSet<>();
 
     public boolean isActive() {

@@ -1,5 +1,6 @@
 package bda.Clinics.service;
 
+import bda.Clinics.dao.model.dto.request.RequestScheduleDto;
 import bda.Clinics.dao.model.entity.Clinic;
 import bda.Clinics.dao.model.entity.Doctor;
 import bda.Clinics.dao.model.entity.Schedule;
@@ -32,4 +33,6 @@ public interface DoctorService {
 
     Optional<Doctor> findDoctorByFullNameAndSpeciality(String fullName, String speciality);
     Doctor createDoctor(RequestDoctorDto doctorDto, MultipartFile photo) throws IOException;
+
+    public void addScheduleToDoctorAndClinic(Long doctorId, Long clinicId, RequestScheduleDto requestScheduleDto);
 }

@@ -1,16 +1,22 @@
 package bda.Clinics.rest;
 
+import bda.Clinics.dao.model.entity.Clinic;
+import bda.Clinics.dao.model.entity.Doctor;
 import bda.Clinics.dao.model.entity.Schedule;
 import bda.Clinics.dao.model.dto.request.RequestScheduleDto;
+import bda.Clinics.dao.repository.ClinicRepository;
+import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.service.ClinicService;
 import bda.Clinics.service.DoctorService;
 import bda.Clinics.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.api.OpenApiResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/schedules")
@@ -25,6 +31,8 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
     private final ClinicService clinicService;
     private final DoctorService doctorService;
+    private final ClinicRepository clinicRepository;
+    private final DoctorRepository doctorRepository;
 
 
     @GetMapping
@@ -39,11 +47,25 @@ public class ScheduleController {
         return ResponseEntity.ok(schedule);
     }
 
-    @PostMapping
-    public ResponseEntity<Schedule> createSchedule(@RequestBody RequestScheduleDto requestScheduleDto) {
-        Schedule createdSchedule = scheduleService.createSchedule(mapToSchedule(requestScheduleDto));
-        return ResponseEntity.ok(createdSchedule);
+    @PostMapping("/bulk")
+    public ResponseEntity<List<Schedule>> createSchedules(@RequestBody List<RequestScheduleDto> requestScheduleDtos) {
+        List<Schedule> schedules = requestScheduleDtos.stream()
+                .map(dto -> {
+                    Schedule schedule = mapToSchedule(dto);
+                    Doctor doctor = doctorRepository.findById(dto.getDoctorId())
+                            .orElseThrow(() -> new OpenApiResourceNotFoundException("Doctor not found with ID: " + dto.getDoctorId()));
+                    Clinic clinic = clinicRepository.findById(dto.getClinicId())
+                            .orElseThrow(() -> new OpenApiResourceNotFoundException("Clinic not found with ID: " + dto.getClinicId()));
+                    schedule.setDoctor(doctor);
+                    schedule.setClinic(clinic);
+                    return schedule;
+                })
+                .collect(Collectors.toList());
+        List<Schedule> createdSchedules = scheduleService.createSchedules(schedules);
+        return ResponseEntity.ok(createdSchedules);
     }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Schedule> updateSchedule(@PathVariable Long id, @RequestBody RequestScheduleDto requestScheduleDto) {

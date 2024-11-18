@@ -22,6 +22,15 @@ public class Schedule {
     String weekDay;
     LocalTime workingHoursFrom;
     LocalTime workingHoursTo;
+
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    Doctor doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "clinic_id")
+    Clinic clinic;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

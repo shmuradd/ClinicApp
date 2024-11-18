@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -29,7 +30,7 @@ public class Clinic {
     Boolean isActive;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "clinic_id", referencedColumnName = "clinicId")
-    Set<Schedule> schedules;
+    Set<Schedule> schedules=new HashSet<>();;
 
     @Override
     public boolean equals(Object o) {

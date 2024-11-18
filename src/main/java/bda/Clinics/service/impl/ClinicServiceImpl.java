@@ -9,6 +9,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +55,21 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     public Clinic createClinic(Clinic clinic) {
+        try {
+            // Check if the clinic's location is empty or null
+            if (clinic.getLocation() == null || clinic.getLocation().isEmpty()) {
+                // Set Baku's default Google Maps link if location is empty
+                clinic.setLocation("https://www.google.com/maps/place/Bak%C3%BC/@40.394737,49.6901489,40414m/data=!3m2!1e3!4b1!4m6!3m5!1s0x40307d6bd6211cf9:0x343f6b5e7ae56c6b!8m2!3d40.4092617!4d49.8670924!16zL20vMDFnZjU?entry=ttu&g_ep=EgoyMDI0MTAyOS4wIKXMDSoASAFQAw%3D%3D");
+            } else {
+                // Encode the provided location into a Google Maps link
+                String encodedLocation = URLEncoder.encode(clinic.getLocation(), StandardCharsets.UTF_8.toString());
+                String googleMapsLink = "https://www.google.com/maps/search/?api=1&query=" + encodedLocation;
+                clinic.setLocation(googleMapsLink);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Optional: handle any encoding exceptions here, or log the error
+        }
         return clinicRepository.save(clinic);
     }
 

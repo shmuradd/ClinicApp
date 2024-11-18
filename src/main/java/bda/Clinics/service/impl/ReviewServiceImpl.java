@@ -12,6 +12,7 @@ import bda.Clinics.dao.repository.ReviewRepository;
 import bda.Clinics.service.ClinicService;
 import bda.Clinics.service.DoctorService;
 import bda.Clinics.service.ReviewService;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -209,18 +210,60 @@ public class ReviewServiceImpl implements ReviewService {
     public List<ResponseReviewDto> getAllReviews() {
         List<Review> reviews = reviewRepository.findAll();
 
-        return reviews.stream()
-                .map(review -> modelMapper.map(review, ResponseReviewDto.class))
-                .sorted((r1, r2) -> {
-                    // Assuming you have a method getStatus() in ResponseReviewDto
-                    if ("PENDING".equals(r1.getStatus()) && !"PENDING".equals(r2.getStatus())) {
-                        return -1; // r1 comes first
-                    } else if (!"PENDING".equals(r1.getStatus()) && "PENDING".equals(r2.getStatus())) {
-                        return 1; // r2 comes first
-                    }
-                    return 0; // keep the same order if both are pending or neither is pending
-                })
-                .collect(Collectors.toList());
+        return reviews.stream().map(review -> {
+            ResponseReviewDto dto = new ResponseReviewDto();
+
+            // Map review fields
+            dto.setReviewId(review.getReviewId());
+            dto.setRating(review.getRating());
+            dto.setComment(review.getComment());
+            dto.setReviewDate(review.getReviewDate());
+            dto.setFullName(review.getFullName());
+            dto.setStatus(review.getStatus());
+            dto.setIsActive(review.getIsActive());
+
+            // Map doctor fields if the doctor is present
+            if (review.getDoctor() != null) {
+                dto.setDoctorId(review.getDoctor().getDoctorId());
+                dto.setDoctorFullName(review.getDoctor().getFullName());
+                dto.setDoctorSpeciality(review.getDoctor().getSpeciality());
+                dto.setDoctorIsActive(review.getDoctor().getIsActive());
+            }
+
+            return dto;
+        }).sorted((r1, r2) -> {
+            // Custom sorting for status: PENDING first, then REJECTED, then APPROVED
+            int statusComparison = getStatusOrder(r1.getStatus()) - getStatusOrder(r2.getStatus());
+
+            // If statuses are different, sort by status
+            if (statusComparison != 0) {
+                return statusComparison;
+            }
+
+            // If statuses are the same, sort by reviewId in descending order (newest first)
+            return r2.getReviewId().compareTo(r1.getReviewId());
+        }).collect(Collectors.toList());
+    }
+
+    // Helper method to define the custom order for statuses
+    private int getStatusOrder(ReviewStatus status) {
+        switch (status) {
+            case PENDING: return 1;
+            case REJECTED: return 2;
+            case APPROVED: return 3;
+            default: return 4;
+        }
+    }
+
+
+    @PostConstruct
+    public void configureModelMapper() {
+        modelMapper.typeMap(Review.class, ResponseReviewDto.class).addMappings(mapper -> {
+            mapper.map(src -> src.getDoctor().getDoctorId(), ResponseReviewDto::setDoctorId);
+            mapper.map(src -> src.getDoctor().getFullName(), ResponseReviewDto::setDoctorFullName);
+            mapper.map(src -> src.getDoctor().getSpeciality(), ResponseReviewDto::setDoctorSpeciality);
+            mapper.map(src -> src.getDoctor().getIsActive(), ResponseReviewDto::setDoctorIsActive);
+        });
     }
 
     @Override

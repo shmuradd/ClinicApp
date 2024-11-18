@@ -9,4 +9,6 @@ public interface ScheduleService {
     Schedule createSchedule(Schedule schedule);
     Schedule updateSchedule(Long scheduleId, Schedule schedule);
     void deleteSchedule(Long scheduleId);
+
+    List<Schedule> createSchedules(List<Schedule> schedules);
 }
