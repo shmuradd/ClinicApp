@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 06
+      author: qedirbabayev
+      changes:
+        - createTable:
+            tableName: reviews
+            columns:
+              - column:
+                 name: review_id
+                 type: INT
+                 autoIncrement: true
+                 constraints:
+                  primaryKey: true
+              - column:
+                 name: reviewer_id
+                 type: INT
+                 constraints:
+                   nullable: false
+              - column:
+                 name: review_text
+                 type: TEXT
+                 constraints:
+                   nullable: false
+              - column:
+                 name: rating
+                 type: INT
+                 constraints:
+                   nullable: false
+              - column:
+                  name: review_date
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: is_confirmed
+                  type: BOOLEAN
+

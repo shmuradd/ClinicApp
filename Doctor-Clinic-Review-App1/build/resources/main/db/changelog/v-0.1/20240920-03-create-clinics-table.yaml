@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 03
+      author: qedirbabayev
+      changes:
+        - createTable:
+            tableName: clinics
+            columns:
+              - column:
+                 name: clinic_id
+                 type: INT
+                 autoIncrement: true
+                 constraints:
+                  primaryKey: true
+              - column:
+                 name: name
+                 type: VARCHAR(255)
+                 constraints:
+                   nullable: false
+              - column:
+                 name: address
+                 type: VARCHAR(255)
+                 constraints:
+                   nullable: false
+              - column:
+                 name: contact_details
+                 type: VARCHAR(255)
+              - column:
+                 name: user_id
+                 type: INT
+                 constraints:
+                  nullable: false
+        - addForeignKeyConstraint:
+           baseTableName: clinics
+           baseColumnNames: user_id
+           constraintName: fk_clinic_user
+           referencedTableName: users
+           referencedColumnNames: user_id

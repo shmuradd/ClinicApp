@@ -2,6 +2,7 @@ package bda.Clinics.rest;
 
 import bda.Clinics.dao.model.Review;
 import bda.Clinics.dao.model.dto.request.RequestReviewDto;
+import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
 import bda.Clinics.dao.model.dto.response.ResponseReviewDto;
 import bda.Clinics.dao.model.enums.ReviewStatus;
 import bda.Clinics.service.ReviewService;
@@ -44,8 +45,8 @@ public class ReviewController {
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<List<Review>> getPendingReviews() {
-        List<Review> pendingReviews = reviewService.getPendingReviews();
+    public ResponseEntity<List<ResponseReviewDto>> getPendingReviews() {
+        List<ResponseReviewDto> pendingReviews = reviewService.getPendingReviews();
         return ResponseEntity.ok(pendingReviews);
     }
 

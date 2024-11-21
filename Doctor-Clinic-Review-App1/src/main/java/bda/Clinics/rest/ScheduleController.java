@@ -2,6 +2,7 @@ package bda.Clinics.rest;
 
 import bda.Clinics.dao.model.Schedule;
 import bda.Clinics.dao.model.dto.request.RequestScheduleDto;
+import bda.Clinics.dao.model.dto.response.ResponseScheduleDto;
 import bda.Clinics.service.ClinicService;
 import bda.Clinics.service.DoctorService;
 import bda.Clinics.service.ScheduleService;
@@ -24,26 +25,26 @@ public class ScheduleController {
 
 
     @GetMapping
-    public ResponseEntity<List<Schedule>> getAllSchedules() {
-        List<Schedule> schedules = scheduleService.getAllSchedules();
+    public ResponseEntity<List<ResponseScheduleDto>> getAllSchedules() {
+        List<ResponseScheduleDto> schedules = scheduleService.getAllSchedules();
         return ResponseEntity.ok(schedules);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Schedule> getScheduleById(@PathVariable Long id) {
-        Schedule schedule = scheduleService.getScheduleById(id);
+    public ResponseEntity<ResponseScheduleDto> getScheduleById(@PathVariable Long id) {
+        ResponseScheduleDto schedule = scheduleService.getScheduleById(id);
         return ResponseEntity.ok(schedule);
     }
 
     @PostMapping
-    public ResponseEntity<Schedule> createSchedule(@RequestBody RequestScheduleDto requestScheduleDto) {
-        Schedule createdSchedule = scheduleService.createSchedule(mapToSchedule(requestScheduleDto));
+    public ResponseEntity<ResponseScheduleDto> createSchedule(@RequestBody RequestScheduleDto requestScheduleDto) {
+        ResponseScheduleDto createdSchedule = scheduleService.createSchedule(mapToSchedule(requestScheduleDto));
         return ResponseEntity.ok(createdSchedule);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Schedule> updateSchedule(@PathVariable Long id, @RequestBody RequestScheduleDto requestScheduleDto) {
-        Schedule updatedSchedule = scheduleService.updateSchedule(id, mapToSchedule(requestScheduleDto));
+    public ResponseEntity<ResponseScheduleDto> updateSchedule(@PathVariable Long id, @RequestBody RequestScheduleDto requestScheduleDto) {
+        ResponseScheduleDto updatedSchedule = scheduleService.updateSchedule(id, mapToSchedule(requestScheduleDto));
         return ResponseEntity.ok(updatedSchedule);
     }
 

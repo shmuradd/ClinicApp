@@ -14,7 +14,7 @@ public interface ReviewService {
 
     List<ResponseReviewDto> getReviewsByDoctorId(Long doctorId);
 
-    List<Review> getPendingReviews();
+    List<ResponseReviewDto> getPendingReviews();
     void updateReviewStatus(Long reviewId, ReviewStatus newStatus);
     public void addReplyToReview(Long parentReviewId, RequestReviewDto replyDto);
 }

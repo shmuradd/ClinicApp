@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/20240920-01-create-user-table.yaml
+  - include:
+      file: db/changelog/20240920-02-create-users-table.yaml
+  - include:
+      file: db/changelog/20240920-03-create-clinics-table.yaml
+  - include:
+      file: db/changelog/20240920-04-create-doctor-table.yaml
+  - include:
+      file: db/changelog/20240920-05-create-doctor-duty-table.yaml
+  - include:
+      file: db/changelog/20240920-06-create-review-table.yaml
+  - include:
+      file: db/changelog/20240920-07-create-doctor_clinics-table.yaml
+  - include:
+      file: db/changelog/20240920-08-create-schedules-table.yaml

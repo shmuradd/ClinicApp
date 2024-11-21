@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ClinicService {
-    List<Clinic> getInactiveClinics();
+    List<ResponseClinicDto> getInactiveClinics();
 
     void updateClinicStatus(Long clinicId, boolean isActive);
 
-    List<Clinic> getAllClinics();
-    Clinic getClinicById(Long clinicId);
-    Clinic createClinic(Clinic clinic);
-    Clinic updateClinic(Long clinicId, Clinic clinic);
+    List<ResponseClinicDto> getAllClinics();
+    ResponseClinicDto getClinicById(Long clinicId);
+    ResponseClinicDto createClinic(Clinic clinic);
+    ResponseClinicDto updateClinic(Long clinicId, Clinic clinic);
     void deleteClinic(Long clinicId);
     void addScheduleToClinic(Long clinicId, Schedule schedule);
 

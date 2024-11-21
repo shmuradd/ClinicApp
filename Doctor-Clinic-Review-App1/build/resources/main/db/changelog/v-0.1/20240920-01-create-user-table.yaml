@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01
+      author: qedirbabayev
+      changes:
+        - createTable:
+            tableName: user_types
+            columns:
+              - column:
+                 name: user_type_id
+                 type: INT
+                 autoIncrement: true
+                 constraints:
+                  primaryKey: true
+              - column:
+                 name: type
+                 type: VARCHAR(255)
+                 constraints:
+                  nullable: false

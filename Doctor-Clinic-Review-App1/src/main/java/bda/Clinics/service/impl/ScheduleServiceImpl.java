@@ -1,38 +1,48 @@
 package bda.Clinics.service.impl;
 
 import bda.Clinics.dao.model.Schedule;
+import bda.Clinics.dao.model.dto.response.ResponseScheduleDto;
 import bda.Clinics.dao.repository.ScheduleRepository;
 import bda.Clinics.service.ScheduleService;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final ModelMapper modelMapper;
 
-    public ScheduleServiceImpl(ScheduleRepository scheduleRepository) {
+    public ScheduleServiceImpl(ScheduleRepository scheduleRepository, @Qualifier("put") ModelMapper modelMapper) {
         this.scheduleRepository = scheduleRepository;
+        this.modelMapper = modelMapper;
+    }
+
+
+    @Override
+    public List<ResponseScheduleDto> getAllSchedules() {
+        return scheduleRepository.findAll().stream().map(schedule-> modelMapper.map(schedule,ResponseScheduleDto.class)).collect(Collectors.toList());
     }
 
     @Override
-    public List<Schedule> getAllSchedules() {
-        return scheduleRepository.findAll();
-    }
-
-    @Override
-    public Schedule getScheduleById(Long scheduleId) {
-        return scheduleRepository.findById(scheduleId)
+    public ResponseScheduleDto getScheduleById(Long scheduleId) {
+        Schedule schedule= scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Schedule not found with ID: " + scheduleId));
+    return modelMapper.map(schedule,ResponseScheduleDto.class);
     }
 
     @Override
-    public Schedule createSchedule(Schedule schedule) {
-        return scheduleRepository.save(schedule);
+    public ResponseScheduleDto createSchedule(Schedule schedule) {
+        Schedule newSchedule =  scheduleRepository.save(schedule);
+         return modelMapper.map(newSchedule,ResponseScheduleDto.class);
     }
 
     @Override
-    public Schedule updateSchedule(Long id, Schedule updatedSchedule) {
+    public ResponseScheduleDto updateSchedule(Long id, Schedule updatedSchedule) {
         Schedule existingSchedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Schedule not found with ID: " + id));
 
@@ -40,7 +50,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         existingSchedule.setWorkingHoursFrom(updatedSchedule.getWorkingHoursFrom());
         existingSchedule.setWorkingHoursTo(updatedSchedule.getWorkingHoursTo());
 
-        return scheduleRepository.save(existingSchedule);
+        Schedule newSchedule =  scheduleRepository.save(existingSchedule);
+        return modelMapper.map(newSchedule,ResponseScheduleDto.class);
     }
 
     @Override
