@@ -1,5 +1,6 @@
 package bda.Clinics.rest;
 
+import bda.Clinics.dao.model.dto.request.CreateDoctorSpecialityDto;
 import bda.Clinics.dao.model.entity.Clinic;
 import bda.Clinics.dao.model.entity.Doctor;
 import bda.Clinics.dao.model.dto.request.RequestDoctorDto;
@@ -11,6 +12,8 @@ import bda.Clinics.service.impl.CloudinaryService;
 import bda.Clinics.service.impl.DoctorServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.api.OpenApiResourceNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -132,18 +135,30 @@ public class DoctorController {
     public void updateDoctor(
             @PathVariable Long id,
             @RequestPart("doctor") RequestDoctorDto doctorDto,
-            @RequestPart("photo") MultipartFile photo) throws IOException {
-        Long realId=34L;
-        Doctor realDoctor=doctorRepository.findById(realId).orElseThrow();
-        realDoctor.setFullName(doctorDto.getFullName());
+            @RequestPart(value = "photo", required = false) MultipartFile photo) throws IOException {
+        // Default photoUrl to null or some placeholder if no photo is provided
+        String photoUrl = null;
+
         // Handle the photo upload if provided
         if (photo != null && !photo.isEmpty()) {
-            String photoUrl = cloudinaryService.uploadImage(photo);
-            realDoctor.setPhotoUrl(photoUrl);
+            photoUrl = cloudinaryService.uploadImage(photo);
         }
 
         // Call the service to update the doctor
-        //Doctor updatedDoctor = doctorService.updateDoctor(id, doctor);
+        doctorService.updateDoctor(id, doctorDto, photoUrl);
+    }
+    // Endpoint for deleting a clinic from a doctor
+    @DeleteMapping("/{doctorId}/clinic/{clinicId}")
+    public ResponseEntity<String> deleteClinicFromDoctor(@PathVariable Long doctorId, @PathVariable Long clinicId) {
+        try {
+            // Call service method to delete clinic
+            doctorService.deleteClinicFromDoctor(doctorId, clinicId);
+            return ResponseEntity.ok("Clinic removed successfully.");
+        } catch (OpenApiResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred while deleting the clinic.");
+        }
     }
 
 
@@ -166,6 +181,15 @@ public class DoctorController {
     public ResponseEntity<Doctor> toggleDoctorStatus(@PathVariable Long id) {
         Doctor updatedDoctor = doctorService.toggleDoctorStatus(id);
         return ResponseEntity.ok(updatedDoctor);
+    }
+
+    @PostMapping("/create-speciality")
+    public ResponseEntity<Doctor> createDoctorWithSpeciality(@RequestBody CreateDoctorSpecialityDto doctorSpecialityDto) {
+        // Call the service to create a doctor with the specified speciality
+        Doctor createdDoctor = doctorService.createDoctorWithSpeciality(doctorSpecialityDto);
+
+        // Return the created doctor
+        return new ResponseEntity<>(createdDoctor, HttpStatus.CREATED);
     }
 }
 

@@ -1,5 +1,6 @@
 package bda.Clinics.service;
 
+import bda.Clinics.dao.model.dto.request.CreateDoctorSpecialityDto;
 import bda.Clinics.dao.model.dto.request.RequestScheduleDto;
 import bda.Clinics.dao.model.entity.Clinic;
 import bda.Clinics.dao.model.entity.Doctor;
@@ -21,7 +22,7 @@ public interface DoctorService {
     List<Doctor> getAllDoctors();
     Doctor getDoctorById(Long doctorId);
     Doctor createDoctor(Doctor doctor);
-    Doctor updateDoctor(Long doctorId, Doctor doctor);
+    Doctor updateDoctor(Long id, RequestDoctorDto doctorDto, String photo);
     void deleteDoctor(Long doctorId);
     ResponseDoctorDto getDoctorDtoById(Long doctorId);
     void addClinicToDoctor(Long doctorId, Clinic clinic);
@@ -35,4 +36,7 @@ public interface DoctorService {
     Doctor createDoctor(RequestDoctorDto doctorDto, MultipartFile photo) throws IOException;
 
     public void addScheduleToDoctorAndClinic(Long doctorId, Long clinicId, RequestScheduleDto requestScheduleDto);
+
+    public Doctor createDoctorWithSpeciality(CreateDoctorSpecialityDto doctorSpecialityDto);
+    public void deleteClinicFromDoctor(Long doctorId, Long clinicId);
 }

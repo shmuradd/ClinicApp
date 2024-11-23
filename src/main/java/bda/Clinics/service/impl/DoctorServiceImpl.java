@@ -1,5 +1,6 @@
 package bda.Clinics.service.impl;
 
+import bda.Clinics.dao.model.dto.request.CreateDoctorSpecialityDto;
 import bda.Clinics.dao.model.dto.request.RequestScheduleDto;
 import bda.Clinics.dao.model.entity.Clinic;
 import bda.Clinics.dao.model.entity.Doctor;
@@ -15,6 +16,7 @@ import bda.Clinics.dao.model.dto.response.ResponseDoctorDto;
 import bda.Clinics.dao.repository.DoctorRepository;
 import bda.Clinics.service.DoctorService;
 import bda.Clinics.util.DoctorSpecification;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springdoc.api.OpenApiResourceNotFoundException;
@@ -183,67 +185,180 @@ public class DoctorServiceImpl implements DoctorService {
     public Optional<Doctor> findDoctorByFullNameAndSpeciality(String fullName, String speciality) {
         return doctorRepository.findByFullNameAndSpeciality(fullName, speciality);
     }
-
+    @Transactional
     @Override
-    public Doctor updateDoctor(Long doctorId, Doctor doctor) {
-        // Find the existing doctor
-        Doctor existingDoctor = doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found."));
+    public Doctor updateDoctor(Long id, RequestDoctorDto doctorDto, String photoUrl) {
+        // Fetch the doctor by ID
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new OpenApiResourceNotFoundException("Doctor with ID " + id + " not found."));
 
-        // Update the basic fields of the doctor
-        existingDoctor.setFullName(doctor.getFullName());
-        existingDoctor.setSpeciality(doctor.getSpeciality());
-        existingDoctor.setServiceDescription(doctor.getServiceDescription());
+        // Update doctor's fields if provided
+        if (doctorDto.getFullName() != null) {
+            doctor.setFullName(doctorDto.getFullName());
+        }
+        if (doctorDto.getSpeciality() != null) {
+            doctor.setSpeciality(doctorDto.getSpeciality());
+        }
+        if (doctorDto.getServiceDescription() != null) {
+            doctor.setServiceDescription(doctorDto.getServiceDescription());
+        }
 
-        // Process the clinics in the doctorDto
-        if (doctor.getClinics() != null && !doctor.getClinics().isEmpty()) {
-            for (Clinic clinicDto : doctor.getClinics()) {
-                // Check if the clinic exists by name or other criteria; if not, create a new one
-                Clinic clinic = clinicRepository.findByClinicName(clinicDto.getClinicName())
-                        .orElseGet(() -> {
-                            Clinic newClinic = new Clinic();
-                            newClinic.setClinicName(clinicDto.getClinicName());
-                            newClinic.setLocation(clinicDto.getLocation());  // Set the location
+        // Update doctor's photo if provided
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            doctor.setPhotoUrl(photoUrl);
+        }
 
-                            // Convert the address to a Google Maps link
-                            String address = clinicDto.getLocation();
-                            String googleMapsLink = "https://www.google.com/maps/place/Bak%C3%BC/@40.394737,49.6901489,40414m/data=!3m2!1e3!4b1!4m6!3m5!1s0x40307d6bd6211cf9:0x343f6b5e7ae56c6b!8m2!3d40.4092617!4d49.8670924!16zL20vMDFnZjU?entry=ttu&g_ep=EgoyMDI0MTAyOS4wIKXMDSoASAFQAw%3D%3D";
-                            newClinic.setLocation(googleMapsLink);  // Save Google Maps link as location
+        // Handle clinics update or deletion
+        if (doctorDto.getClinics() != null) {
+            // Case 1: If the clinics list is empty, remove all clinics and their schedules
+            if (doctorDto.getClinics().isEmpty()) {
+                // Remove all clinics from the doctor
+                doctor.getClinics().forEach(clinic -> {
+                    // Delete the clinic's schedules
+                    scheduleRepository.deleteByClinic_ClinicId(clinic.getClinicId());
+                });
 
-                            return clinicRepository.save(newClinic); // Save the new clinic and return it
-                        });
+                // Remove all clinics from the doctor's list
+                doctor.getClinics().clear();
+            } else {
+                // Case 2: Handle updates to existing clinics or additions of new ones
+                Set<String> requestedClinicNames = doctorDto.getClinics().stream()
+                        .map(RequestClinicDto::getClinicName)
+                        .collect(Collectors.toSet());
 
-                // Add the clinic to the doctor
-                doctor.addClinics(clinic);
+                // Remove clinics that are no longer in the request
+                List<Clinic> clinicsToRemove = doctor.getClinics().stream()
+                        .filter(existingClinic -> !requestedClinicNames.contains(existingClinic.getClinicName()))
+                        .collect(Collectors.toList());
 
-                if (clinicDto.getSchedules() != null && !clinicDto.getSchedules().isEmpty()) {
-                    for (Schedule scheduleDto : clinicDto.getSchedules()) {
-                        // Create and save the schedule
-                        Schedule schedule = new Schedule();
-                        schedule.setWeekDay(scheduleDto.getWeekDay());
-
-                        // Convert working hours from String to LocalTime
-                        //LocalTime.parse(scheduleDto.getWorkingHoursFrom());
-                       // LocalTime workingHoursTo = LocalTime.parse(scheduleDto.getWorkingHoursTo());
-
-                      //  schedule.setWorkingHoursFrom(workingHoursFrom);  // Set LocalTime
-                       // schedule.setWorkingHoursTo(workingHoursTo);      // Set LocalTime
-                        schedule.setClinic(clinic);  // Associate schedule with the clinic
-
-                        // Save the schedule
-                        scheduleRepository.save(schedule);
-
-                        // Optionally, add the schedule to the doctor and clinic (for easy retrieval)
-                        clinic.getSchedules().add(schedule);
-                    }
+                for (Clinic clinicToRemove : clinicsToRemove) {
+                    removeClinics(doctor, clinicToRemove);
                 }
 
+                // Add new or updated clinics
+                for (RequestClinicDto clinicDto : doctorDto.getClinics()) {
+                    Clinic clinic = doctor.getClinics().stream()
+                            .filter(existingClinic -> existingClinic.getClinicName().equalsIgnoreCase(clinicDto.getClinicName()))
+                            .findFirst()
+                            .orElseGet(() -> {
+                                Clinic newClinic = new Clinic();
+                                newClinic.setClinicName(clinicDto.getClinicName());
+                                newClinic.setLocation("https://www.google.com/maps/place/Bak%C3%BC/@40.394737,49.6901489,40414m/data=!3m2!1e3!4b1!4m6!3m5!1s0x40307d6bd6211cf9:0x343f6b5e7ae56c6b!8m2!3d40.4092617!4d49.8670924!16zL20vMDFnZjU?entry=ttu&g_ep=EgoyMDI0MTAyOS4wIKXMDSoASAFQAw%3D%3D");
+
+                                doctor.addClinics(newClinic); // Add new clinic to the doctor
+                                return newClinic;
+                            });
+
+                    // Update clinic fields
+                    if (clinicDto.getLocation() != null) {
+                        clinic.setLocation(clinicDto.getLocation());
+                    }
+                    if (clinicDto.getCity() != null) {
+                        clinic.setCity(clinicDto.getCity());
+                    }
+                    if (clinicDto.getContactDetails() != null) {
+                        clinic.setContactDetails(clinicDto.getContactDetails());
+                    }
+                    clinic.setIsActive(true);
+
+                    // Save the clinic
+                    clinicRepository.save(clinic);
+
+                    // Process schedules
+                    Set<String> clinicScheduleDays = clinicDto.getSchedules().stream()
+                            .map(RequestScheduleDto::getWeekDay)
+                            .collect(Collectors.toSet());
+
+                    // Find and delete schedules not part of the updated schedule
+                    List<Schedule> schedulesToRemove = clinic.getSchedules().stream()
+                            .filter(existingSchedule -> !clinicScheduleDays.contains(existingSchedule.getWeekDay()))
+                            .collect(Collectors.toList());
+
+                    for (Schedule scheduleToRemove : schedulesToRemove) {
+                        // Remove the schedule
+                        scheduleRepository.deleteByClinicAndDoctor(clinic.getClinicId(), doctor.getDoctorId());
+                    }
+
+                    // Reassign the new schedules
+                    for (RequestScheduleDto scheduleDto : clinicDto.getSchedules()) {
+                        updateOrCreateSchedule(doctor, clinic, scheduleDto);
+                    }
+                }
             }
         }
 
         // Save and return the updated doctor
-        return doctorRepository.save(existingDoctor);
+        return doctorRepository.save(doctor);
     }
+
+
+    private void removeClinics(Doctor doctor, Clinic clinic) {
+        // Ensure that the doctor removes the clinic from their list
+        doctor.getClinics().remove(clinic);
+        clinic.getDoctors().remove(doctor);  // If the relationship is bidirectional
+    }
+
+
+
+    @Transactional
+    @Override
+    public void deleteClinicFromDoctor(Long doctorId, Long clinicId) {
+        // Fetch the doctor by ID
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new OpenApiResourceNotFoundException("Doctor with ID " + doctorId + " not found."));
+
+        // Fetch the clinic by ID from the doctor's list of clinics
+        Clinic clinic = doctor.getClinics().stream()
+                .filter(c -> c.getClinicId().equals(clinicId))
+                .findFirst()
+                .orElseThrow(() -> new OpenApiResourceNotFoundException("Clinic with ID " + clinicId + " not found in doctor's list."));
+
+        // Delete all schedules associated with this doctor and clinic
+        scheduleRepository.deleteByClinicAndDoctor(clinicId, doctorId);
+        System.out.println("Schedules deleted for doctorId: " + doctorId + " and clinicId: " + clinicId);
+
+        // Remove the clinic from the doctor's list of clinics
+        doctor.removeClinics(clinic);
+        System.out.println("Clinic removed from doctor");
+
+        // Save the doctor after modification (necessary for persistence)
+        doctorRepository.save(doctor);
+        System.out.println("Doctor saved");
+
+        // Optionally, delete the clinic from the repository if it is no longer needed
+        if (clinic.getDoctors().isEmpty()) {  // Check if clinic is no longer associated with any doctor
+            clinicRepository.delete(clinic);
+            System.out.println("Clinic deleted");
+        }
+    }
+
+
+
+
+
+
+    private void updateOrCreateSchedule(Doctor doctor, Clinic clinic, RequestScheduleDto scheduleDto) {
+        Schedule schedule = scheduleRepository.findByClinicAndDoctorAndWeekDay(
+                clinic, doctor, scheduleDto.getWeekDay()
+        ).orElseGet(() -> {
+            // Create a new schedule if not found
+            Schedule newSchedule = new Schedule();
+            newSchedule.setDoctor(doctor);
+            newSchedule.setClinic(clinic);
+            return newSchedule;
+        });
+
+        // Update or set schedule details
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        schedule.setWeekDay(scheduleDto.getWeekDay());
+        schedule.setWorkingHoursFrom(LocalTime.parse(scheduleDto.getWorkingHoursFrom(), formatter));
+        schedule.setWorkingHoursTo(LocalTime.parse(scheduleDto.getWorkingHoursTo(), formatter));
+
+        // Save updated schedule
+        scheduleRepository.save(schedule);
+    }
+
+
 
 
 
@@ -368,6 +483,8 @@ public class DoctorServiceImpl implements DoctorService {
                             Clinic newClinic = new Clinic();
                             newClinic.setClinicName(clinicDto.getClinicName());
                             newClinic.setLocation(clinicDto.getLocation());  // Set the location
+                            newClinic.setContactDetails(clinicDto.getContactDetails());  // Set the contact details
+                            newClinic.setCity(clinicDto.getCity());
 
                             // Convert the address to a Google Maps link
                             String address = clinicDto.getLocation();
@@ -375,7 +492,20 @@ public class DoctorServiceImpl implements DoctorService {
                             newClinic.setLocation(googleMapsLink);  // Save Google Maps link as location
 
                             return clinicRepository.save(newClinic); // Save the new clinic and return it
+
                         });
+                clinic.setClinicName(clinicDto.getClinicName());
+                clinic.setLocation(clinicDto.getLocation());  // Set the location
+                clinic.setContactDetails(clinicDto.getContactDetails());  // Set the contact details
+                clinic.setCity(clinicDto.getCity());
+                if (clinicDto.getLocation()==null)
+                {
+                    clinic.setLocation("https://www.google.com/maps/place/Bak%C3%BC/@40.394737,49.6901489,40414m/data=!3m2!1e3!4b1!4m6!3m5!1s0x40307d6bd6211cf9:0x343f6b5e7ae56c6b!8m2!3d40.4092617!4d49.8670924!16zL20vMDFnZjU?entry=ttu&g_ep=EgoyMDI0MTAyOS4wIKXMDSoASAFQAw%3D%3D");
+                }
+                else
+                {
+                    clinic.setLocation(clinicDto.getLocation());
+                }
 
                 // Add the clinic to the doctor
                 doctor.addClinics(clinic);
@@ -411,8 +541,26 @@ public class DoctorServiceImpl implements DoctorService {
         // Save and return the doctor with associated clinics and schedules
         return doctorRepository.save(doctor);
     }
+    @Override
+    public Doctor createDoctorWithSpeciality(CreateDoctorSpecialityDto doctorSpecialityDto) {
+        // First, check if a doctor with the same speciality already exists
+        Doctor existingDoctor = doctorRepository.findBySpeciality(doctorSpecialityDto.getSpecialityName());
 
+        if (existingDoctor != null) {
+            // If a doctor with the same speciality exists, return it
+            return existingDoctor;
+        }
 
+        // Create a new doctor if no existing doctor is found
+        Doctor doctor = new Doctor();
+        doctor.setFullName("Dr. " + doctorSpecialityDto.getSpecialityName() + " - Default Doctor");
+        doctor.setSpeciality(doctorSpecialityDto.getSpecialityName());  // Store the speciality directly
+        doctor.setIsActive(false);  // Set the doctor as inactive by default
+        doctor.setServiceDescription("Default service description");
+
+        // Save the doctor to the database
+        return doctorRepository.save(doctor);
+    }
 
 
 }

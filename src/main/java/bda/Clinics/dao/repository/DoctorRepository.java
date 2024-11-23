@@ -25,4 +25,7 @@ public interface DoctorRepository extends JpaRepository<Doctor,Long> , JpaSpecif
 
     Optional<Doctor> findByFullNameAndSpeciality(String fullName, String speciality);
 
+    Doctor findBySpeciality(String specialityName);
+
+    Optional<Doctor> findBySpecialityAndFullName(String speciality, String fullName);
 }

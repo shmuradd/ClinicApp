@@ -5,8 +5,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://clinics-do-user-17950168-0.l.db.ondigitalocean.com:25060/defaultdb?sslmode=require
-    username: ${DB_USERNAME}  # Use environment variable for sensitive info
-    password: ${DB_PASSWORD}  # Use environment variable for sensitive info
+    username: doadmin
+    password: AVNS_ouQvQEXjqECLLIypm8Y
     hikari:
       maximum-pool-size: 10
   web:
@@ -32,12 +32,13 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-
 project:
   image: images/
   file.upload-dir: /var/www/uploads
 
+
 cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME}  # Use environment variable for sensitive info
-  api-key: ${CLOUDINARY_API_KEY}  # Use environment variable for sensitive info
-  api-secret: ${CLOUDINARY_API_SECRET}  # Use environment variable for sensitive info
+  cloud-name: du25ep0gr
+  api-key: 692984156171973
+  api-secret: 8vuJlBI_b0QuUgLB4AepD-3DBZI
+

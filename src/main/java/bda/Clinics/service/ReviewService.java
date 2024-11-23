@@ -7,6 +7,7 @@ import bda.Clinics.dao.model.dto.response.ResponseReviewDto;
 import bda.Clinics.dao.model.enums.ReviewStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReviewService {
     void saveReview(Long doctorId, RequestReviewDto requestReviewDto);
@@ -25,5 +26,5 @@ public interface ReviewService {
                                     RequestReviewDto requestReviewDto);
 
     public ResponseReviewDto getReviewById(Long reviewId);
-
+    public List<ResponseReviewDto> findTop3ApprovedReviews();
 }

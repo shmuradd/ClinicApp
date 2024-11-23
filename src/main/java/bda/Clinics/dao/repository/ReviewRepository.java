@@ -3,6 +3,7 @@ package bda.Clinics.dao.repository;
 import bda.Clinics.dao.model.entity.Review;
 import bda.Clinics.dao.model.enums.ReviewStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 

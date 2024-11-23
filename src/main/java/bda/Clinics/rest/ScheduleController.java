@@ -100,6 +100,7 @@ public class ScheduleController {
         doctorService.addScheduleToDoctor(doctorId, schedule);
         return ResponseEntity.ok().build();
     }
+
     private Schedule mapToSchedule(RequestScheduleDto dto) {
         return Schedule.builder()
                 .weekDay(dto.getWeekDay())

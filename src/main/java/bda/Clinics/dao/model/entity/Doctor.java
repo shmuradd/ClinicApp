@@ -31,9 +31,9 @@ public class Doctor {
     String qualifications;
     Double experience;
     String service;
-    @Lob
     @Column(name = "service_description", columnDefinition = "TEXT") // Optional column definition for specific DB types
-    private String serviceDescription;    Boolean isActive;
+    private String serviceDescription;
+    Boolean isActive;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonBackReference
@@ -63,4 +63,9 @@ public class Doctor {
         this.clinics.add(clinic);
     }
 
+
+    // Add a method to remove a clinic
+    public void removeClinics(Clinic clinic) {
+        this.clinics.remove(clinic);
+    }
 }

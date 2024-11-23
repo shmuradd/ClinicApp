@@ -20,6 +20,7 @@ import org.springdoc.api.OpenApiResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -47,11 +48,30 @@ public class ReviewServiceImpl implements ReviewService {
     public void saveReview(Long doctorId, RequestReviewDto requestReviewDto) {
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        boolean duplicateReview = doctor.getReviews().stream()
+                .anyMatch(existingReview ->
+                        existingReview.getFullName().equals(requestReviewDto.getFullName()) &&
+                                existingReview.getComment().equals(requestReviewDto.getComment()) &&
+                                existingReview.getRating() == requestReviewDto.getRating() &&
+                                existingReview.getDoctor().getDoctorId().equals(doctorId) &&
+                                existingReview.getReviewDate() != null &&
+                                existingReview.getReviewDate().after(new Date(System.currentTimeMillis() - 5 * 60 * 1000)) // 5-minute window
+                );
+
+
+        if (duplicateReview) {
+            throw new IllegalStateException("You have already submitted a similar review recently.");
+        }
+
         Review review = modelMapper.map(requestReviewDto, Review.class);
         review.setStatus(ReviewStatus.PENDING);
+        review.setIsActive(false);
         doctor.getReviews().add(review);
+        reviewRepository.save(review);
         doctorRepository.save(doctor);
     }
+
 
     public void addReviewToDoctorByFullName(String fullName, String clinicName, RequestReviewDto requestReviewDto, String speciality) {
         Doctor doctor = doctorRepository.findByFullName(fullName)
@@ -77,24 +97,63 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Transactional
     @Override
-    public void addReviewWithClinic(String fullName, String speciality, String clinicName, RequestReviewDto requestReviewDto) {
-        Doctor doctor = doctorService.findDoctorByFullNameAndSpeciality(fullName, speciality)
-                .orElseGet(() -> createInactiveDoctor(fullName, speciality));
+        public void addReviewWithClinic(String fullName, String speciality, String clinicName, RequestReviewDto requestReviewDto) {
+        // Step 1: Check if the doctor with the given speciality exists
+        Optional<Doctor> existingDoctorOpt = doctorRepository.findBySpecialityAndFullName(speciality,fullName);
 
-        Clinic clinic = clinicRepository.findByClinicName(clinicName)
-                .orElseGet(() -> createInactiveClinic(clinicName));
-
-        if (doctor.getClinics() == null) {
-            doctor.setClinics(new HashSet<>());
+        Doctor doctor;
+        if (existingDoctorOpt.isPresent()) {
+            doctor = existingDoctorOpt.get();
+        } else {
+            // Step 2: If doctor doesn't exist, create a new doctor with isActive = false
+            doctor = new Doctor();
+            doctor.setFullName(fullName);
+            doctor.setSpeciality(speciality);
+            doctor.setIsActive(false);  // Set the doctor as inactive
+            doctorRepository.save(doctor);
         }
-        doctor.getClinics().add(clinic);
-        // Map and save the review with pending status
-        Review review = modelMapper.map(requestReviewDto, Review.class);
+
+        // Step 3: Check if the clinic with the given clinicName already exists in the doctor's clinics
+        Optional<Clinic> existingClinicOpt = doctor.getClinics().stream()
+                .filter(clinic -> clinic.getClinicName().equals(clinicName))
+                .findFirst();
+
+        Clinic clinic;
+        if (existingClinicOpt.isPresent()) {
+            // If the clinic exists, use the existing clinic
+            clinic = existingClinicOpt.get();
+        } else {
+            // Step 4: If the clinic doesn't exist, create a new clinic and associate it with the doctor
+            clinic = new Clinic();
+            clinic.setClinicName(clinicName);
+            clinic.setLocation("https://www.google.com/maps/place/Bak%C3%BC/@40.394737,49.6901489,40414m/data=!3m2!1e3!4b1!4m6!3m5!1s0x40307d6bd6211cf9:0x343f6b5e7ae56c6b!8m2!3d40.4092617!4d49.8670924!16zL20vMDFnZjU?entry=ttu&g_ep=EgoyMDI0MTAyOS4wIKXMDSoASAFQAw%3D%3D");
+            clinic.addDoctor(doctor);  // Set the doctor reference in the clinic
+            clinic.setIsActive(false);  // Set the clinic as inactive
+            // Add clinic to the doctor's clinics list (assuming it's a collection)
+            doctor.getClinics().add(clinic);
+
+            // Save the clinic
+            clinicRepository.save(clinic);
+
+            // Save the updated doctor with the new clinic
+            doctorRepository.save(doctor);
+        }
+
+        // Step 5: Create the review and associate it with the clinic
+        Review review = new Review();
+        review.setRating(requestReviewDto.getRating());
+        review.setComment(requestReviewDto.getComment());
+        review.setFullName(requestReviewDto.getFullName());
+
+
         review.setStatus(ReviewStatus.PENDING);
         review.setDoctor(doctor);
-
+        review.setIsActive(false);  // Set the review as inactive
+        // Save the review
         reviewRepository.save(review);
-        doctorRepository.save(doctor);  // Save doctor with updated clinic relationship
+
+        // Log the review creation (optional)
+        log.info("Review added for clinic {} of doctor {} by {}.", clinicName, doctor.getFullName(), fullName);
     }
 
     @Override
@@ -278,4 +337,58 @@ public class ReviewServiceImpl implements ReviewService {
         }
     }
 
+    @Override
+    // Fetch Top 3 Approved Reviews
+    public List<ResponseReviewDto> findTop3ApprovedReviews() {
+        // Fetch reviews and sort them by review date in descending order
+        return reviewRepository.findAll().stream()
+                .filter(review -> review.getStatus() == ReviewStatus.APPROVED) // Filter approved reviews
+                .sorted((r1, r2) -> r2.getReviewDate().compareTo(r1.getReviewDate())) // Sort by reviewDate in descending order
+                .limit(3) // Limit to top 3
+                .map(review -> {
+                    // Extract doctor details
+                    String doctorFullName = review.getDoctor() != null ? review.getDoctor().getFullName() : "No doctor assigned";
+                    String doctorSpeciality = review.getDoctor() != null ? review.getDoctor().getSpeciality() : "No speciality assigned";
+                    Boolean doctorIsActive = review.getDoctor() != null ? review.getDoctor().getIsActive() : false;
+                    Long doctorId = review.getDoctor() != null ? review.getDoctor().getDoctorId() : null;
+
+                    // Map review to ResponseReviewDto with doctor details
+                    return ResponseReviewDto.builder()
+                            .reviewId(review.getReviewId())
+                            .rating(review.getRating())
+                            .comment(review.getComment())
+                            .reviewDate(review.getReviewDate())
+                            .fullName(review.getFullName())
+                            .status(review.getStatus())
+                            .isActive(review.getIsActive())
+                            .doctorId(doctorId)
+                            .doctorFullName(doctorFullName)
+                            .doctorSpeciality(doctorSpeciality)
+                            .doctorIsActive(doctorIsActive)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+
 }
+
+//public void addReviewWithClinic(String fullName, String speciality, String clinicName, RequestReviewDto requestReviewDto) {
+//    Doctor doctor = doctorService.findDoctorByFullNameAndSpeciality(fullName, speciality)
+//            .orElseGet(() -> createInactiveDoctor(fullName, speciality));
+//
+//    Clinic clinic = clinicRepository.findByClinicName(clinicName)
+//            .orElseGet(() -> createInactiveClinic(clinicName));
+//
+//    if (doctor.getClinics() == null) {
+//        doctor.setClinics(new HashSet<>());
+//    }
+//    doctor.getClinics().add(clinic);
+//    // Map and save the review with pending status
+//    Review review = modelMapper.map(requestReviewDto, Review.class);
+//    review.setStatus(ReviewStatus.PENDING);
+//    review.setDoctor(doctor);
+//
+//    reviewRepository.save(review);
+//    doctorRepository.save(doctor);  // Save doctor with updated clinic relationship
+//}

@@ -1,6 +1,7 @@
 package bda.Clinics.dao.repository;
 
 import bda.Clinics.dao.model.entity.Clinic;
+import bda.Clinics.dao.model.entity.Doctor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,4 +13,5 @@ public interface ClinicRepository extends JpaRepository<Clinic,Long> {
 
     List<Clinic> findByIsActiveFalse();
 
+    Optional<Clinic> findByClinicNameAndDoctors_DoctorId(String clinicName, Long doctorId);
 }

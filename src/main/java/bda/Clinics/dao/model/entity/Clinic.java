@@ -1,5 +1,6 @@
 package bda.Clinics.dao.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -32,6 +33,11 @@ public class Clinic {
     @JoinColumn(name = "clinic_id", referencedColumnName = "clinicId")
     Set<Schedule> schedules=new HashSet<>();;
 
+    @ManyToMany(mappedBy = "clinics", fetch = FetchType.LAZY)
+    @JsonBackReference
+    Set<Doctor> doctors = new HashSet<>();
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -44,4 +50,20 @@ public class Clinic {
     public int hashCode() {
         return Objects.hash(clinicName, location, contactDetails, city, isActive);
     }
+
+    // Optional utility method to add a doctor
+    public void addDoctor(Doctor doctor) {
+        this.doctors.add(doctor);
+    }
+
+    public void removeDoctor(Doctor doctorToRemove) {
+        if (doctorToRemove != null && this.doctors != null) {
+            // Remove the clinic from the doctor's clinic list
+            this.doctors.remove(doctorToRemove);
+
+            // Break the bidirectional relationship by setting the doctor reference to null
+            //clinicToRemove.setDoctor(null);
+        }
+    }
+
 }

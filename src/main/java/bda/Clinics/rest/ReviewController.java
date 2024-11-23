@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/review")
@@ -45,7 +46,7 @@ public class ReviewController {
     }
 
     @PostMapping
-    public void addReview(@Param("id") Long doctorId,
+    public void addReview(@RequestParam("id") Long doctorId,
                           @RequestBody RequestReviewDto requestReviewDto) {
         reviewService.saveReview(doctorId, requestReviewDto);
     }
@@ -109,5 +110,11 @@ public class ReviewController {
         Review updatedReview = reviewService.toggleReviewStatus(id);
         return ResponseEntity.ok(updatedReview);
     }
+
+    @GetMapping("/top-approved")
+    public List<ResponseReviewDto> getTop3ApprovedReviews() {
+        return reviewService.findTop3ApprovedReviews();
+    }
+
 }
 
