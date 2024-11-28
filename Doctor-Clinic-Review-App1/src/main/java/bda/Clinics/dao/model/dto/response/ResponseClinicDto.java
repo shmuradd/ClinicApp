@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResponseClinicDto {
+    Long clinicId;
     String clinicName;
     String location;
     String contactDetails;

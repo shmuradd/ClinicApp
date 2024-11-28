@@ -103,8 +103,8 @@ public class ReviewServiceImpl implements ReviewService {
         return collect;
     }
     @Override
-    public List<Review> getPendingReviews() {
-        return reviewRepository.findByStatus(ReviewStatus.PENDING);
+    public List<ResponseReviewDto> getPendingReviews() {
+        return reviewRepository.findByStatus(ReviewStatus.PENDING).stream().map(review -> modelMapper.map(review,ResponseReviewDto.class)).collect(Collectors.toList());
     }
 
     @Override

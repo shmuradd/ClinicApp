@@ -26,14 +26,14 @@ public class ClinicServiceImpl implements ClinicService {
     private  final ClinicRepository clinicRepository;
     private final ModelMapper modelMapper;
 
-    public ClinicServiceImpl(ClinicRepository clinicRepository,@Qualifier("patch") ModelMapper modelMapper) {
+    public ClinicServiceImpl(ClinicRepository clinicRepository,@Qualifier("put") ModelMapper modelMapper) {
         this.clinicRepository = clinicRepository;
         this.modelMapper = modelMapper;
     }
 
     @Override
-    public List<Clinic> getInactiveClinics() {
-        return clinicRepository.findByIsActiveFalse();
+    public List<ResponseClinicDto> getInactiveClinics() {
+        return clinicRepository.findByIsActiveFalse().stream().map(clinic -> modelMapper.map(clinic,ResponseClinicDto.class)).collect(Collectors.toList());
     }
     @Override
     public void updateClinicStatus(Long clinicId, boolean isActive) {
@@ -46,26 +46,30 @@ public class ClinicServiceImpl implements ClinicService {
     }
 
     @Override
-    public List<Clinic> getAllClinics() {
-        return clinicRepository.findAll();
+    public List<ResponseClinicDto> getAllClinics() {
+        return clinicRepository.findAll().stream().map(clinic -> modelMapper.map(clinic,ResponseClinicDto.class)).collect(Collectors.toList());
     }
 
     @Override
-    public Clinic getClinicById(Long clinicId) {
-        return clinicRepository.findById(clinicId)
+    public ResponseClinicDto getClinicById(Long clinicId) {
+        Clinic clinic= clinicRepository.findById(clinicId)
                 .orElseThrow(() -> new RuntimeException("Clinic not found with ID: " + clinicId));
+        return modelMapper.map(clinic,ResponseClinicDto.class);
     }
 
     @Override
-    public Clinic createClinic(Clinic clinic) {
-        return clinicRepository.save(clinic);
+    public ResponseClinicDto createClinic(Clinic clinic) {
+        Clinic newClinic=clinicRepository.save(clinic);
+        return modelMapper.map(newClinic,ResponseClinicDto.class);
     }
 
     @Override
-    public Clinic updateClinic(Long clinicId, Clinic clinic) {
-        Clinic existingClinic = getClinicById(clinicId);
+    public ResponseClinicDto updateClinic(Long clinicId, Clinic clinic) {
+        Clinic existingClinic = clinicRepository.findById(clinicId).orElseThrow(() -> new RuntimeException("Clinic not found with ID: " + clinicId));
+        clinicRepository.save(existingClinic);
         modelMapper.map(existingClinic,clinic);
-        return clinicRepository.save(existingClinic);
+        return modelMapper.map(existingClinic,ResponseClinicDto.class);
+
     }
 
     @Override

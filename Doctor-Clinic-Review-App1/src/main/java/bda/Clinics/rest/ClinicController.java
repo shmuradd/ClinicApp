@@ -22,8 +22,8 @@ import java.util.List;
 public class ClinicController {
     private final ClinicService clinicService;
     @GetMapping("/clinics/inactive")
-    public ResponseEntity<List<Clinic>> getInactiveClinics() {
-        List<Clinic> inactiveClinics = clinicService.getInactiveClinics();
+    public ResponseEntity<List<ResponseClinicDto>> getInactiveClinics() {
+        List<ResponseClinicDto> inactiveClinics = clinicService.getInactiveClinics();
         return ResponseEntity.ok(inactiveClinics);
     }
     @PutMapping("/{clinicId}/status")
@@ -32,26 +32,26 @@ public class ClinicController {
         return ResponseEntity.noContent().build();
     }
     @GetMapping
-    public ResponseEntity<List<Clinic>> getAllClinics() {
-        List<Clinic> clinics = clinicService.getAllClinics();
+    public ResponseEntity<List<ResponseClinicDto>> getAllClinics() {
+        List<ResponseClinicDto> clinics = clinicService.getAllClinics();
         return ResponseEntity.ok(clinics);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Clinic> getClinicById(@PathVariable Long id) {
-        Clinic clinic = clinicService.getClinicById(id);
+    public ResponseEntity<ResponseClinicDto> getClinicById(@PathVariable Long id) {
+        ResponseClinicDto clinic = clinicService.getClinicById(id);
         return ResponseEntity.ok(clinic);
     }
 
     @PostMapping
-    public ResponseEntity<Clinic> createClinic(@RequestBody Clinic clinic) {
-        Clinic createdClinic = clinicService.createClinic(clinic);
+    public ResponseEntity<ResponseClinicDto> createClinic(@RequestBody Clinic clinic) {
+        ResponseClinicDto createdClinic = clinicService.createClinic(clinic);
         return ResponseEntity.ok(createdClinic);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Clinic> updateClinic(@PathVariable Long id, @RequestBody Clinic clinic) {
-        Clinic updatedClinic = clinicService.updateClinic(id, clinic);
+    public ResponseEntity<ResponseClinicDto> updateClinic(@PathVariable Long id, @RequestBody Clinic clinic) {
+        ResponseClinicDto updatedClinic = clinicService.updateClinic(id, clinic);
         return ResponseEntity.ok(updatedClinic);
     }
 
